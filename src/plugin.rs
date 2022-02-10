@@ -26,6 +26,10 @@ impl AccountsDbPlugin for KafkaPlugin {
         "KafkaPlugin"
     }
 
+    fn notify_end_of_startup(&mut self) -> PluginResult<()> {
+        Ok(())
+    }
+
     fn on_load(&mut self, config_file: &str) -> PluginResult<()> {
         if self.publisher.is_some() {
             let err = simple_error!("plugin already loaded");
@@ -109,14 +113,6 @@ impl AccountsDbPlugin for KafkaPlugin {
         publisher
             .update_slot_status(event)
             .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })
-    }
-
-    fn account_data_notifications_enabled(&self) -> bool {
-        self.unwrap_publisher().wants_update_account()
-    }
-
-    fn transaction_notifications_enabled(&self) -> bool {
-        false
     }
 }
 
