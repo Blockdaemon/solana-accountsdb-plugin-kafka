@@ -11,7 +11,7 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-prost = "0.9"
+prost = "0.10"
 rdkafka = { version = "0.28", features = ["ssl-vendored", "sasl"] }
 solana-accountsdb-plugin-interface = { version = "=1.9.12" }
 solana-logger = { version = "=1.9.12" }
