@@ -40,6 +40,9 @@ pub struct Config {
     /// Kafka topic to send slot status updates to.
     #[serde(default)]
     pub slot_status_topic: String,
+    /// Kafka topic to send transaction to.
+    #[serde(default)]
+    pub transaction_topic: String,
     /// List of programs to ignore.
     #[serde(default)]
     pub program_ignores: Vec<String>,
@@ -55,6 +58,7 @@ impl Default for Config {
             shutdown_timeout_ms: 30_000,
             update_account_topic: "".to_owned(),
             slot_status_topic: "".to_owned(),
+            transaction_topic: "".to_owned(),
             program_ignores: Vec::new(),
             publish_all_accounts: false,
         }
