@@ -6,4 +6,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-cargo read-manifest | jq -r '.dependencies[] | select(.name == "solana-accountsdb-plugin-interface") | .req'
+cargo read-manifest | jq -r '.dependencies[] | select(.name == "solana-geyser-plugin-interface") | .req'
