@@ -17,8 +17,8 @@ use {
     log::info,
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
-    solana_accountsdb_plugin_interface::accountsdb_plugin_interface::{
-        AccountsDbPlugin, AccountsDbPluginError as PluginError, ReplicaAccountInfo,
+    solana_geyser_plugin_interface::geyser_plugin_interface::{
+        GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfo,
         ReplicaAccountInfoVersions, Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
     std::fmt::{Debug, Formatter},
@@ -37,7 +37,7 @@ impl Debug for KafkaPlugin {
     }
 }
 
-impl AccountsDbPlugin for KafkaPlugin {
+impl GeyserPlugin for KafkaPlugin {
     fn name(&self) -> &'static str {
         "KafkaPlugin"
     }

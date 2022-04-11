@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use solana_accountsdb_plugin_interface::accountsdb_plugin_interface::AccountsDbPlugin;
+use solana_geyser_plugin_interface::geyser_plugin_interface::GeyserPlugin;
 
 mod config;
 mod event;
@@ -32,12 +32,12 @@ pub use {
 #[allow(improper_ctypes_definitions)]
 /// # Safety
 ///
-/// This function returns a pointer to the Kafka Plugin box implementing trait AccountsDbPlugin.
+/// This function returns a pointer to the Kafka Plugin box implementing trait GeyserPlugin.
 ///
 /// The Solana validator and this plugin must be compiled with the same Rust compiler version and Solana core version.
 /// Loading this plugin with mismatching versions is undefined behavior and will likely cause memory corruption.
-pub unsafe extern "C" fn _create_plugin() -> *mut dyn AccountsDbPlugin {
+pub unsafe extern "C" fn _create_plugin() -> *mut dyn GeyserPlugin {
     let plugin = KafkaPlugin::new();
-    let plugin: Box<dyn AccountsDbPlugin> = Box::new(plugin);
+    let plugin: Box<dyn GeyserPlugin> = Box::new(plugin);
     Box::into_raw(plugin)
 }
