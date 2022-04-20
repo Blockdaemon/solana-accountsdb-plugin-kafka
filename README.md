@@ -1,6 +1,6 @@
 # Solana AccountsDB Plugin for Kafka
 
-Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com/developing/plugins/accountsdb_plugin).
+Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com/developing/plugins/geyser-plugins).
 
 ## Installation
 
