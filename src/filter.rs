@@ -20,6 +20,7 @@ use {
 
 pub struct Filter {
     program_ignores: HashSet<[u8; 32]>,
+    owners: HashSet<[u8; 32]>,
 }
 
 impl Filter {
@@ -30,6 +31,12 @@ impl Filter {
                 .iter()
                 .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
                 .collect(),
+           owners: config
+                .owners
+                .iter()
+                .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
+                .collect(),
+
         }
     }
 
@@ -38,7 +45,7 @@ impl Filter {
             Ok(key) => key,
             _ => return true,
         };
-        !self.program_ignores.contains(key)
+        !self.program_ignores.contains(key) && ( self.owners.len() == 0 || self.owners.contains(key) )
     }
 }
 
@@ -66,6 +73,40 @@ mod tests {
         ));
         assert!(!filter.wants_program(
             &Pubkey::from_str("Vote111111111111111111111111111111111111111")
+                .unwrap()
+                .to_bytes()
+        ));
+    }
+
+    #[test]
+    fn test_owner_filter() {
+        let config = Config {
+            program_ignores: vec![
+                "Sysvar1111111111111111111111111111111111111".to_owned(),
+                "Vote111111111111111111111111111111111111111".to_owned(),
+            ],
+            owners: vec![ 
+                "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned(),
+            ],
+            ..Config::default()
+        };
+
+        let filter = Filter::new(&config);
+        assert_eq!(filter.program_ignores.len(), 2);
+
+        assert!(filter.wants_program(
+            &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                .unwrap()
+                .to_bytes()
+        ));
+        assert!(!filter.wants_program(
+            &Pubkey::from_str("Vote111111111111111111111111111111111111111")
+                .unwrap()
+                .to_bytes()
+        ));
+
+        assert!(!filter.wants_program(
+            &Pubkey::from_str("cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ")
                 .unwrap()
                 .to_bytes()
         ));
