@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/wrappers.proto";
+
 package blockdaemon.solana.accountsdb_plugin_kafka.types;
 
 message UpdateAccountEvent {
@@ -51,4 +53,113 @@ enum SlotStatus {
 
   // The highest slot that has been voted on by supermajority of the cluster, ie. is confirmed.
   Confirmed = 2;
+}
+
+// MessageHeader
+message MessageHeader {
+  uint32 num_required_signatures = 1;
+  uint32 num_readonly_signed_accounts = 2;
+  uint32 num_readonly_unsigned_accounts = 3;
+}
+
+// CompiledInstruction
+message CompiledInstruction {
+  uint32 program_id_index = 1;
+  repeated uint32 accounts = 2;
+  bytes data = 3;
+}
+
+message LoadedAddresses {
+  repeated bytes writable = 1;
+  repeated bytes readonly = 2;
+}
+
+message MessageAddressTableLookup {
+  bytes account_key = 1;
+  repeated uint32 writable_indexes = 2;
+  repeated uint32 readonly_indexes = 3;
+}
+
+message V0Message {
+  MessageHeader header = 1;
+  repeated bytes account_keys = 2;
+  bytes recent_block_hash = 3;
+  repeated CompiledInstruction instructions = 4;
+  repeated MessageAddressTableLookup address_table_lookup = 5;
+}
+
+message V0LoadedMessage {
+  V0Message message_ = 1;
+  LoadedAddresses loaded_adresses = 2;
+}
+
+message LegacyMessage {
+  MessageHeader header = 1;
+  repeated bytes account_keys = 2;
+  bytes recent_block_hash = 3;
+  repeated CompiledInstruction instructions = 4;
+}
+
+message SanitizedMessage {
+  oneof message_payload {
+    LegacyMessage legacy = 1;
+    V0LoadedMessage v0 = 2;
+  }
+}
+
+message SanitizedTransaction {
+  SanitizedMessage message_ = 1;
+  bytes message_hash = 2;
+  bool is_simple_vote_transaction = 3;
+  repeated bytes signatures = 4;
+}
+
+message InnerInstruction {
+  uint32 index = 1;
+  repeated CompiledInstruction instructions = 2;
+}
+
+message UiTokenAmount {
+  google.protobuf.DoubleValue ui_amount = 1;
+  uint32 decimals = 2;
+  string amount = 3;
+  string ui_amount_string = 4;
+}
+
+message TransactionTokenBalance {
+  uint32 account_index = 1;
+  string mint = 2;
+  UiTokenAmount ui_token_account = 3;
+  string owner = 4;
+}
+
+message Reward {
+  string pubkey = 1;
+  int64 lamports = 2;
+  uint64 post_balance = 3;
+  // reward_type is an enum, but protobuf will require it to be able to accept any int32.
+  int32 reward_type = 4;
+  uint32 commission = 5;
+}
+
+message TransactionStatusMeta {
+  bool is_status_err = 1;
+  string error_info = 2;
+  uint64 fee = 3;
+  repeated uint64 pre_balances = 4;
+  repeated uint64 post_balances = 5;
+  repeated InnerInstruction inner_instructions = 6;
+  repeated string log_messages = 7;
+  repeated TransactionTokenBalance pre_token_balances = 8;
+  repeated TransactionTokenBalance post_token_balances = 9;
+  repeated Reward rewards = 10;
+}
+
+// based on solana_accountsdb_plugin_interface::accountsdb_plugin_interface::ReplicaTransactionInfo
+message TransactionEvent {
+  bytes signature = 1;
+  bool is_vote = 2;
+  SanitizedTransaction transaction = 3;
+  TransactionStatusMeta transaction_status_meta = 4;
+  uint64 slot = 5;
 }

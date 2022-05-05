@@ -19,7 +19,8 @@ use {
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfo,
-        ReplicaAccountInfoVersions, Result as PluginResult, SlotStatus as PluginSlotStatus,
+        ReplicaAccountInfoVersions, ReplicaTransactionInfoVersions, Result as PluginResult,
+        SlotStatus as PluginSlotStatus,
     },
     std::fmt::{Debug, Formatter},
 };
@@ -132,12 +133,29 @@ impl GeyserPlugin for KafkaPlugin {
             .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })
     }
 
+    fn notify_transaction(
+        &mut self,
+        transaction: ReplicaTransactionInfoVersions,
+        slot: u64,
+    ) -> PluginResult<()> {
+        let publisher = self.unwrap_publisher();
+        if !publisher.wants_transaction() {
+            return Ok(());
+        }
+
+        let event = Self::build_transaction_event(slot, transaction);
+
+        publisher
+            .update_transaction(event)
+            .map_err(|e| PluginError::TransactionUpdateError { msg: e.to_string() })
+    }
+
     fn account_data_notifications_enabled(&self) -> bool {
         self.unwrap_publisher().wants_update_account()
     }
 
     fn transaction_notifications_enabled(&self) -> bool {
-        false
+        self.unwrap_publisher().wants_transaction()
     }
 }
 
@@ -157,6 +175,209 @@ impl KafkaPlugin {
     fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfo {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(info) => info,
+        }
+    }
+
+    fn build_compiled_instruction(
+        ix: &solana_program::instruction::CompiledInstruction,
+    ) -> CompiledInstruction {
+        CompiledInstruction {
+            program_id_index: ix.program_id_index as u32,
+            accounts: ix.clone().accounts.into_iter().map(|v| v as u32).collect(),
+            data: ix.data.clone(),
+        }
+    }
+
+    fn build_message_header(header: &solana_program::message::MessageHeader) -> MessageHeader {
+        MessageHeader {
+            num_required_signatures: header.num_required_signatures as u32,
+            num_readonly_signed_accounts: header.num_readonly_signed_accounts as u32,
+            num_readonly_unsigned_accounts: header.num_readonly_unsigned_accounts as u32,
+        }
+    }
+
+    fn build_transaction_token_balance(
+        transaction_token_account_balance: solana_transaction_status::TransactionTokenBalance,
+    ) -> TransactionTokenBalance {
+        TransactionTokenBalance {
+            account_index: transaction_token_account_balance.account_index as u32,
+            ui_token_account: Some(UiTokenAmount {
+                ui_amount: transaction_token_account_balance.ui_token_amount.ui_amount,
+                decimals: transaction_token_account_balance.ui_token_amount.decimals as u32,
+                amount: transaction_token_account_balance.ui_token_amount.amount,
+                ui_amount_string: transaction_token_account_balance
+                    .ui_token_amount
+                    .ui_amount_string,
+            }),
+            mint: transaction_token_account_balance.mint,
+            owner: transaction_token_account_balance.owner,
+        }
+    }
+
+    fn build_transaction_event(
+        slot: u64,
+        transaction: ReplicaTransactionInfoVersions,
+    ) -> TransactionEvent {
+        let ReplicaTransactionInfoVersions::V0_0_1(transaction) = transaction;
+        let transaction_status_meta = transaction.transaction_status_meta;
+        let signature = transaction.signature;
+        let is_vote = transaction.is_vote;
+        let transaction = transaction.transaction;
+        TransactionEvent {
+            is_vote,
+            slot,
+            signature: signature.as_ref().into(),
+            transaction_status_meta: Some(TransactionStatusMeta {
+                is_status_err: transaction_status_meta.status.is_err(),
+                error_info: match &transaction_status_meta.status {
+                    Err(e) => e.to_string(),
+                    Ok(_) => "".to_owned(),
+                },
+                rewards: transaction_status_meta
+                    .rewards
+                    .clone()
+                    .unwrap()
+                    .into_iter()
+                    .map(|x| Reward {
+                        pubkey: x.pubkey,
+                        lamports: x.lamports,
+                        post_balance: x.post_balance,
+                        reward_type: match x.reward_type {
+                            Some(r) => r as i32,
+                            None => 0,
+                        },
+                        commission: match x.commission {
+                            Some(v) => v as u32,
+                            None => 0,
+                        },
+                    })
+                    .collect(),
+                fee: transaction_status_meta.fee,
+                log_messages: match &transaction_status_meta.log_messages {
+                    Some(v) => v.to_owned(),
+                    None => vec![],
+                },
+                inner_instructions: match &transaction_status_meta.inner_instructions {
+                    None => vec![],
+                    Some(inners) => inners
+                        .clone()
+                        .into_iter()
+                        .map(|inner| InnerInstruction {
+                            index: inner.index as u32,
+                            instructions: inner
+                                .instructions
+                                .iter()
+                                .map(Self::build_compiled_instruction)
+                                .collect(),
+                        })
+                        .collect(),
+                },
+                pre_balances: transaction_status_meta.pre_balances.clone(),
+                post_balances: transaction_status_meta.post_balances.clone(),
+                pre_token_balances: match &transaction_status_meta.pre_token_balances {
+                    Some(v) => v
+                        .clone()
+                        .into_iter()
+                        .map(Self::build_transaction_token_balance)
+                        .collect(),
+                    None => vec![],
+                },
+                post_token_balances: match &transaction_status_meta.post_token_balances {
+                    Some(v) => v
+                        .clone()
+                        .into_iter()
+                        .map(Self::build_transaction_token_balance)
+                        .collect(),
+                    None => vec![],
+                },
+            }),
+            transaction: Some(SanitizedTransaction {
+                message_hash: transaction.message_hash().to_bytes().into(),
+                is_simple_vote_transaction: transaction.is_simple_vote_transaction(),
+                message: Some(SanitizedMessage {
+                    message_payload: Some(match transaction.message() {
+                        solana_program::message::SanitizedMessage::Legacy(lv) => {
+                            sanitized_message::MessagePayload::Legacy(LegacyMessage {
+                                header: Some(Self::build_message_header(&lv.header)),
+                                account_keys: lv
+                                    .account_keys
+                                    .clone()
+                                    .into_iter()
+                                    .map(|k| k.as_ref().into())
+                                    .collect(),
+                                instructions: lv
+                                    .instructions
+                                    .iter()
+                                    .map(Self::build_compiled_instruction)
+                                    .collect(),
+                                recent_block_hash: lv.recent_blockhash.as_ref().into(),
+                            })
+                        }
+                        solana_program::message::SanitizedMessage::V0(v0) => {
+                            sanitized_message::MessagePayload::V0(V0LoadedMessage {
+                                message: Some(V0Message {
+                                    header: Some(Self::build_message_header(&v0.message.header)),
+                                    account_keys: v0
+                                        .message
+                                        .account_keys
+                                        .clone()
+                                        .into_iter()
+                                        .map(|k| k.as_ref().into())
+                                        .collect(),
+                                    recent_block_hash: v0.message.recent_blockhash.as_ref().into(),
+                                    instructions: v0
+                                        .message
+                                        .instructions
+                                        .iter()
+                                        .map(Self::build_compiled_instruction)
+                                        .collect(),
+                                    address_table_lookup: v0
+                                        .message
+                                        .address_table_lookups
+                                        .clone()
+                                        .into_iter()
+                                        .map(|vf| MessageAddressTableLookup {
+                                            account_key: vf.account_key.as_ref().into(),
+                                            writable_indexes: vf
+                                                .writable_indexes
+                                                .iter()
+                                                .map(|x| *x as u32)
+                                                .collect(),
+                                            readonly_indexes: vf
+                                                .readonly_indexes
+                                                .iter()
+                                                .map(|x| *x as u32)
+                                                .collect(),
+                                        })
+                                        .collect(),
+                                }),
+                                loaded_adresses: Some(LoadedAddresses {
+                                    writable: v0
+                                        .loaded_addresses
+                                        .writable
+                                        .clone()
+                                        .into_iter()
+                                        .map(|x| x.as_ref().into())
+                                        .collect(),
+                                    readonly: v0
+                                        .loaded_addresses
+                                        .readonly
+                                        .clone()
+                                        .into_iter()
+                                        .map(|x| x.as_ref().into())
+                                        .collect(),
+                                }),
+                            })
+                        }
+                    }),
+                }),
+                signatures: transaction
+                    .signatures()
+                    .iter()
+                    .copied()
+                    .map(|x| x.as_ref().into())
+                    .collect(),
+            }),
         }
     }
 }

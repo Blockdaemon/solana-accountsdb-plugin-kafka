@@ -28,6 +28,7 @@ pub struct Publisher {
 
     update_account_topic: String,
     slot_status_topic: String,
+    transaction_topic: String,
 }
 
 impl Publisher {
@@ -37,6 +38,7 @@ impl Publisher {
             shutdown_timeout: Duration::from_millis(config.shutdown_timeout_ms),
             update_account_topic: config.update_account_topic.clone(),
             slot_status_topic: config.slot_status_topic.clone(),
+            transaction_topic: config.transaction_topic.clone(),
         }
     }
 
@@ -54,12 +56,22 @@ impl Publisher {
         self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
     }
 
+    pub fn update_transaction(&self, ev: TransactionEvent) -> Result<(), KafkaError> {
+        let buf = ev.encode_to_vec();
+        let record = BaseRecord::<(), _>::to(&self.transaction_topic).payload(&buf);
+        self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
+    }
+
     pub fn wants_update_account(&self) -> bool {
         !self.update_account_topic.is_empty()
     }
 
     pub fn wants_slot_status(&self) -> bool {
         !self.slot_status_topic.is_empty()
+    }
+
+    pub fn wants_transaction(&self) -> bool {
+        !self.transaction_topic.is_empty()
     }
 }
 
