@@ -145,24 +145,11 @@ impl GeyserPlugin for KafkaPlugin {
 
         let filter = self.unwrap_filter();
         let transaction = Self::unwrap_notify_transaction(transaction);
-        let message = transaction.transaction.message();
-        if !message
-            .instructions()
-            .iter()
-            .chain(
-                transaction
-                    .transaction_status_meta
-                    .inner_instructions
-                    .iter()
-                    .flatten()
-                    .flat_map(|inner| inner.instructions.iter()),
-            )
-            .any(|instruction| {
-                message
-                    .get_account_key(instruction.program_id_index as usize)
-                    .map(|pubkey| filter.wants_program(pubkey.as_ref()))
-                    .unwrap_or(false)
-            })
+        if !transaction
+            .transaction
+            .message()
+            .account_keys_iter()
+            .any(|pubkey| filter.wants_program(pubkey.as_ref()))
         {
             return Ok(());
         }
