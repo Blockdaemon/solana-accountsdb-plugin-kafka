@@ -19,8 +19,8 @@ use {
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfo,
-        ReplicaAccountInfoVersions, ReplicaTransactionInfoVersions, Result as PluginResult,
-        SlotStatus as PluginSlotStatus,
+        ReplicaAccountInfoVersions, ReplicaTransactionInfo, ReplicaTransactionInfoVersions,
+        Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
     std::fmt::{Debug, Formatter},
 };
@@ -143,6 +143,30 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
+        let filter = self.unwrap_filter();
+        let transaction = Self::unwrap_notify_transaction(transaction);
+        let message = transaction.transaction.message();
+        if !message
+            .instructions()
+            .iter()
+            .chain(
+                transaction
+                    .transaction_status_meta
+                    .inner_instructions
+                    .iter()
+                    .flatten()
+                    .flat_map(|inner| inner.instructions.iter()),
+            )
+            .any(|instruction| {
+                message
+                    .get_account_key(instruction.program_id_index as usize)
+                    .map(|pubkey| filter.wants_program(pubkey.as_ref()))
+                    .unwrap_or(false)
+            })
+        {
+            return Ok(());
+        }
+
         let event = Self::build_transaction_event(slot, transaction);
 
         publisher
@@ -175,6 +199,14 @@ impl KafkaPlugin {
     fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfo {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(info) => info,
+        }
+    }
+
+    fn unwrap_notify_transaction(
+        transaction: ReplicaTransactionInfoVersions,
+    ) -> &ReplicaTransactionInfo {
+        match transaction {
+            ReplicaTransactionInfoVersions::V0_0_1(info) => info,
         }
     }
 
@@ -216,9 +248,8 @@ impl KafkaPlugin {
 
     fn build_transaction_event(
         slot: u64,
-        transaction: ReplicaTransactionInfoVersions,
+        transaction: &ReplicaTransactionInfo,
     ) -> TransactionEvent {
-        let ReplicaTransactionInfoVersions::V0_0_1(transaction) = transaction;
         let transaction_status_meta = transaction.transaction_status_meta;
         let signature = transaction.signature;
         let is_vote = transaction.is_vote;

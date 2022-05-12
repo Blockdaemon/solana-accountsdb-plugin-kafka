@@ -31,12 +31,11 @@ impl Filter {
                 .iter()
                 .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
                 .collect(),
-           program_filters: config
+            program_filters: config
                 .program_filters
                 .iter()
                 .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
                 .collect(),
-
         }
     }
 
@@ -45,7 +44,7 @@ impl Filter {
             Ok(key) => key,
             _ => return true,
         };
-        !self.program_ignores.contains(key) && ( self.program_filters.len() == 0 || self.program_filters.contains(key) )
+        !self.program_ignores.contains(key) && self.program_filters.contains(key)
     }
 }
 
@@ -85,9 +84,7 @@ mod tests {
                 "Sysvar1111111111111111111111111111111111111".to_owned(),
                 "Vote111111111111111111111111111111111111111".to_owned(),
             ],
-            program_filters: vec![ 
-                "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned(),
-            ],
+            program_filters: vec!["9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned()],
             ..Config::default()
         };
 
