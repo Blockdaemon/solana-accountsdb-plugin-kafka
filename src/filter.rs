@@ -21,6 +21,7 @@ use {
 pub struct Filter {
     program_ignores: HashSet<[u8; 32]>,
     program_filters: HashSet<[u8; 32]>,
+    account_filters: HashSet<[u8; 32]>,
 }
 
 impl Filter {
@@ -36,6 +37,11 @@ impl Filter {
                 .iter()
                 .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
                 .collect(),
+            account_filters: config
+                .account_filters
+                .iter()
+                .flat_map(|p| Pubkey::from_str(p).ok().map(|p| p.to_bytes()))
+                .collect(),
         }
     }
 
@@ -44,7 +50,16 @@ impl Filter {
             Ok(key) => key,
             _ => return true,
         };
-        !self.program_ignores.contains(key) && (self.program_filters.len() == 0 || self.program_filters.contains(key))
+        !self.program_ignores.contains(key)
+            && (self.program_filters.is_empty() || self.program_filters.contains(key))
+    }
+
+    pub fn wants_account(&self, account: &[u8]) -> bool {
+        let key = match <&[u8; 32]>::try_from(account) {
+            Ok(key) => key,
+            _ => return true,
+        };
+        self.account_filters.contains(key)
     }
 }
 
@@ -105,6 +120,39 @@ mod tests {
 
         assert!(!filter.wants_program(
             &Pubkey::from_str("cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ")
+                .unwrap()
+                .to_bytes()
+        ));
+    }
+
+    #[test]
+    fn test_account_filter() {
+        let config = Config {
+            program_filters: vec!["9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned()],
+            account_filters: vec!["5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht".to_owned()],
+            ..Config::default()
+        };
+
+        let filter = Filter::new(&config);
+        assert_eq!(filter.program_filters.len(), 1);
+        assert_eq!(filter.account_filters.len(), 1);
+
+        println!("{:?}", filter.account_filters);
+        println!(
+            "{:?}",
+            &Pubkey::from_str("5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht")
+                .unwrap()
+                .to_bytes()
+        );
+
+        assert!(filter.wants_program(
+            &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                .unwrap()
+                .to_bytes()
+        ));
+
+        assert!(filter.wants_account(
+            &Pubkey::from_str("5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht")
                 .unwrap()
                 .to_bytes()
         ));
