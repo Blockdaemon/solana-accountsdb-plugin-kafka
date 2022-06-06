@@ -60,6 +60,8 @@ Config is specified via the plugin's JSON config file.
 - `slot_status_topic`: Topic name of slot status update. Omit to disable.
 - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
 - `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
+- `program_filters`: Solana program IDs to include.
+- `account_filters`: Solana accounts to include.
 
 ## Buffering
 
