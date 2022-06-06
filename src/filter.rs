@@ -44,7 +44,7 @@ impl Filter {
             Ok(key) => key,
             _ => return true,
         };
-        !self.program_ignores.contains(key) && self.program_filters.contains(key)
+        !self.program_ignores.contains(key) && (self.program_filters.len() == 0 || self.program_filters.contains(key))
     }
 }
 
