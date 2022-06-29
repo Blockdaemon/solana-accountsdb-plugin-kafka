@@ -150,7 +150,8 @@ impl GeyserPlugin for KafkaPlugin {
         if !transaction
             .transaction
             .message()
-            .account_keys_iter()
+            .account_keys()
+            .iter()
             .any(|pubkey| {
                 filter.wants_program(pubkey.as_ref()) || filter.wants_account(pubkey.as_ref())
             })
