@@ -21,6 +21,10 @@ log = "0.4"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 simple-error = "0.2.3"
+tokio = { version = "1.14", features = ["rt-multi-thread", "time", "macros", "sync"] }
+prometheus = "0.13"
+hyper = { version = "0.14", features = ["server"] }
+lazy_static = "1"
 
 [build-dependencies]
 prost-build = "0.10"
