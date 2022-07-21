@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use {
+    crate::PrometheusService,
     rdkafka::{
         config::FromClientConfig,
         error::KafkaResult,
@@ -23,7 +24,7 @@ use {
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPluginError, Result as PluginResult,
     },
-    std::{collections::HashMap, fs::File, path::Path},
+    std::{collections::HashMap, fs::File, io::Result as IoResult, net::SocketAddr, path::Path},
 };
 
 /// Plugin config.
@@ -55,6 +56,9 @@ pub struct Config {
     /// Publish all accounts on startup.
     #[serde(default)]
     pub publish_all_accounts: bool,
+    /// Prometheus endpoint.
+    #[serde(default)]
+    pub prometheus: Option<SocketAddr>,
 }
 
 impl Default for Config {
@@ -69,6 +73,7 @@ impl Default for Config {
             program_filters: Vec::new(),
             account_filters: Vec::new(),
             publish_all_accounts: false,
+            prometheus: None,
         }
     }
 }
@@ -103,6 +108,10 @@ impl Config {
         self.set_default("message.timeout.ms", "30000");
         self.set_default("compression.type", "lz4");
         self.set_default("partitioner", "murmur2_random");
+    }
+
+    pub fn create_prometheus(&self) -> IoResult<Option<PrometheusService>> {
+        self.prometheus.map(PrometheusService::new).transpose()
     }
 }
 

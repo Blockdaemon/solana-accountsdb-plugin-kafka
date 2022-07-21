@@ -30,6 +30,7 @@ pub struct KafkaPlugin {
     publisher: Option<Publisher>,
     filter: Option<Filter>,
     publish_all_accounts: bool,
+    prometheus: Option<PrometheusService>,
 }
 
 impl Debug for KafkaPlugin {
@@ -67,8 +68,12 @@ impl GeyserPlugin for KafkaPlugin {
         info!("Created rdkafka::FutureProducer");
 
         let publisher = Publisher::new(producer, &config);
+        let prometheus = config
+            .create_prometheus()
+            .map_err(|error| PluginError::Custom(Box::new(error)))?;
         self.publisher = Some(publisher);
         self.filter = Some(Filter::new(&config));
+        self.prometheus = prometheus;
         info!("Spawned producer");
 
         Ok(())
@@ -77,6 +82,9 @@ impl GeyserPlugin for KafkaPlugin {
     fn on_unload(&mut self) {
         self.publisher = None;
         self.filter = None;
+        if let Some(prometheus) = self.prometheus.take() {
+            prometheus.shutdown();
+        }
     }
 
     fn update_account(
