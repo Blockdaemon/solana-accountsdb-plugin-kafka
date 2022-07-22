@@ -14,7 +14,7 @@
 
 use {
     crate::*,
-    log::info,
+    log::*,
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
@@ -62,9 +62,10 @@ impl GeyserPlugin for KafkaPlugin {
         let (version_n, version_s) = get_rdkafka_version();
         info!("rd_kafka_version: {:#08x}, {}", version_n, version_s);
 
-        let producer = config
-            .producer()
-            .map_err(|e| PluginError::Custom(Box::new(e)))?;
+        let producer = config.producer().map_err(|e| {
+            error!("Failed to create kafka producer: {:?}", e);
+            PluginError::Custom(Box::new(e))
+        })?;
         info!("Created rdkafka::FutureProducer");
 
         let publisher = Publisher::new(producer, &config);
