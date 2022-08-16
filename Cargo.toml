@@ -13,10 +13,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 prost = "0.10"
 rdkafka = { version = "0.28", features = ["ssl-vendored", "sasl"] }
-solana-geyser-plugin-interface = { version = "=1.10.31" }
-solana-logger = { version = "=1.10.31" }
-solana-program = { version = "=1.10.31" }
-solana-transaction-status = { version = "=1.10.31" }
+solana-geyser-plugin-interface = { version = "=1.10.34" }
+solana-logger = { version = "=1.10.34" }
+solana-program = { version = "=1.10.34" }
+solana-transaction-status = { version = "=1.10.34" }
 log = "0.4"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
