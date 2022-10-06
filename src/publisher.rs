@@ -14,19 +14,22 @@
 
 use {
     crate::{
-        prom::{UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL, UPLOAD_TRANSACTIONS_TOTAL},
+        prom::{
+            StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
+            UPLOAD_TRANSACTIONS_TOTAL,
+        },
         *,
     },
     prost::Message,
     rdkafka::{
         error::KafkaError,
-        producer::{BaseRecord, Producer as KafkaProducer},
+        producer::{BaseRecord, Producer, ThreadedProducer},
     },
     std::time::Duration,
 };
 
 pub struct Publisher {
-    producer: Producer,
+    producer: ThreadedProducer<StatsThreadedProducerContext>,
     shutdown_timeout: Duration,
 
     update_account_topic: String,
@@ -35,7 +38,7 @@ pub struct Publisher {
 }
 
 impl Publisher {
-    pub fn new(producer: Producer, config: &Config) -> Self {
+    pub fn new(producer: ThreadedProducer<StatsThreadedProducerContext>, config: &Config) -> Self {
         Self {
             producer,
             shutdown_timeout: Duration::from_millis(config.shutdown_timeout_ms),
