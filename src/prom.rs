@@ -1,4 +1,5 @@
 use {
+    crate::version::VERSION as VERSION_INFO,
     hyper::{
         server::conn::AddrStream,
         service::{make_service_fn, service_fn},
@@ -17,6 +18,11 @@ use {
 
 lazy_static::lazy_static! {
     pub static ref REGISTRY: Registry = Registry::new();
+
+    static ref VERSION: IntCounterVec = IntCounterVec::new(
+        Opts::new("version", "Plugin version info"),
+        &["key", "value"]
+    ).unwrap();
 
     pub static ref UPLOAD_ACCOUNTS_TOTAL: IntCounterVec = IntCounterVec::new(
         Opts::new("upload_accounts_total", "Status of uploaded accounts"),
@@ -55,10 +61,21 @@ impl PrometheusService {
                         .expect("collector can't be registered");
                 };
             }
+            register!(VERSION);
             register!(UPLOAD_ACCOUNTS_TOTAL);
             register!(UPLOAD_SLOTS_TOTAL);
             register!(UPLOAD_TRANSACTIONS_TOTAL);
             register!(KAFKA_STATS);
+
+            for (key, value) in &[
+                ("version", VERSION_INFO.version),
+                ("solana", VERSION_INFO.solana),
+                ("git", VERSION_INFO.git),
+                ("rustc", VERSION_INFO.rustc),
+                ("buildts", VERSION_INFO.buildts),
+            ] {
+                VERSION.with_label_values(&[key, value]).inc()
+            }
         });
 
         let runtime = Runtime::new()?;
