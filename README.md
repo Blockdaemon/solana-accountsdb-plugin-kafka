@@ -36,7 +36,8 @@ Config is specified via the plugin's JSON config file.
     "request.required.acks": "1",
     "message.timeout.ms": "30000",
     "compression.type": "lz4",
-    "partitioner": "murmur2_random"
+    "partitioner": "murmur2_random",
+    "statistics.interval.ms": "1000"
   },
   "shutdown_timeout_ms": 30000,
   "update_account_topic": "solana.testnet.account_updates",

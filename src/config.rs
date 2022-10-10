@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use {
-    crate::PrometheusService,
+    crate::{prom::StatsThreadedProducerContext, PrometheusService},
     rdkafka::{
-        config::FromClientConfig,
+        config::FromClientConfigAndContext,
         error::KafkaResult,
         producer::{DefaultProducerContext, ThreadedProducer},
         ClientConfig,
@@ -89,12 +89,12 @@ impl Config {
     }
 
     /// Create rdkafka::FutureProducer from config.
-    pub fn producer(&self) -> KafkaResult<Producer> {
+    pub fn producer(&self) -> KafkaResult<ThreadedProducer<StatsThreadedProducerContext>> {
         let mut config = ClientConfig::new();
         for (k, v) in self.kafka.iter() {
             config.set(k, v);
         }
-        ThreadedProducer::from_config(&config)
+        ThreadedProducer::from_config_and_context(&config, StatsThreadedProducerContext::default())
     }
 
     fn set_default(&mut self, k: &'static str, v: &'static str) {
