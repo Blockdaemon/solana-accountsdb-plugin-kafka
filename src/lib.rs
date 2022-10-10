@@ -20,6 +20,7 @@ mod filter;
 mod plugin;
 mod prom;
 mod publisher;
+mod version;
 
 pub use {
     config::{Config, Producer},
