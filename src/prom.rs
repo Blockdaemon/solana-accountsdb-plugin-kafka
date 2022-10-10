@@ -58,6 +58,7 @@ impl PrometheusService {
             register!(UPLOAD_ACCOUNTS_TOTAL);
             register!(UPLOAD_SLOTS_TOTAL);
             register!(UPLOAD_TRANSACTIONS_TOTAL);
+            register!(KAFKA_STATS);
         });
 
         let runtime = Runtime::new()?;
