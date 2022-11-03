@@ -1,74 +1,35 @@
 # Solana AccountsDB Plugin for Kafka
+Context:
 
-Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com/developing/plugins/geyser-plugins).
+- geyser plugin nodes are responsible for sending account info updates to [our secondary infrastructure](https://www.notion.so/Solana-Account-Cache-via-Geyser-Plugin-d131d72fd0744dda86b7f9cb2c166d6a)
+- geyser plugin library version need to be in sync with the solana binary version, therefore we’ll need to rebuild the geyser plugin library each time we upgrade solana binary
 
-## Installation
+## BlockDaemon
+- This is a fork of blockdaemon's geyser plugin for kafka
+- Refer to the git repo for original documentation on configuration, etc 
+  https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka
 
-### Binary releases
+## How to Build
 
-Find binary releases at: https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka/releases
+Steps to prepare Geyser Plugin Library:
+ 
+- The "intended version" listed below need to match the solana binary version in [alchemy-infrastructure](https://github.com/OMGWINNING/alchemy-infrastructure/blob/master/ansible/group_vars/solana_mainnet#L1)  
+- Download the intended version of solana docker image from [docker hub](https://hub.docker.com/r/solanalabs/solana/tags)
+- Update the `Cargo.toml` file in this repo to reflect the intended solana binary version. ([Sample Commit](https://github.com/OMGWINNING/solana-accountsdb-plugin-kafka/commit/81fc48d2ed61e8b900665d199e75de2890c6a150)) 
+- Run the solana docker image locally with geyser plugin library path mapped to container path
+- Bash into the solana docker container, go to the path of the geyser plugin library, and run following commands to install the dependencies
 
-### Building from source
+    ```bash
+    apt-get update
+    apt-get curl
+    curl https://sh.rustup.rs -sSf | sh
+    source $HOME/.cargo/env
+    rustup component add rustfmt
+    apt-get install libssl-dev libudev-dev pkg-config zlib1g-dev llvm clang cmake make libprotobuf-dev protobuf-compiler libsdl2-dev
+    Cargo build --release
+    ```
 
-```shell
-cargo build --release
-```
-
-- Linux: `./target/release/libsolana_accountsdb_plugin_kafka.so`
-- macOS: `./target/release/libsolana_accountsdb_plugin_kafka.dylib`
-
-**Important:** Solana's plugin interface requires the build environment of the Solana validator and this plugin to be **identical**.
-
-This includes the Solana version and Rust compiler version.
-Loading a plugin targeting wrong versions will result in memory corruption and crashes.
-
-## Config
-
-Config is specified via the plugin's JSON config file.
-
-### Example Config
-
-```json
-{
-  "libpath": "/solana/target/release/libsolana_accountsdb_plugin_kafka.so",
-  "kafka": {
-    "bootstrap.servers": "localhost:9092",
-    "request.required.acks": "1",
-    "message.timeout.ms": "30000",
-    "compression.type": "lz4",
-    "partitioner": "murmur2_random"
-  },
-  "shutdown_timeout_ms": 30000,
-  "update_account_topic": "solana.testnet.account_updates",
-  "slot_status_topic": "solana.testnet.slot_status",
-  "publish_all_accounts": false,
-  "program_ignores": [
-    "Sysvar1111111111111111111111111111111111111",
-    "Vote111111111111111111111111111111111111111"
-  ]
-}
-```
-
-### Reference
-
-- `libpath`: Path to Kafka plugin
-- `kafka`: [`librdkafka` config options](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
-  This plugin overrides the defaults as seen in the example config.
-- `shutdown_timeout_ms`: Time the plugin is given to flush out all messages to Kafka upon exit request.
-- `update_account_topic`: Topic name of account updates. Omit to disable.
-- `slot_status_topic`: Topic name of slot status update. Omit to disable.
-- `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
-- `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
-
-## Buffering
-
-The Kafka producer acts strictly non-blocking to allow the Solana validator to sync without much induced lag.
-This means incoming events from the Solana validator will get buffered and published asynchronously.
-
-When the publishing buffer is exhausted any additional events will get dropped.
-This can happen when Kafka brokers are too slow or the connection to Kafka fails.
-Therefor it is crucial to choose a sufficiently large buffer.
-
-The buffer size can be controlled using `librdkafka` config options, including:
-- `queue.buffering.max.messages`: Maximum number of messages allowed on the producer queue.
-- `queue.buffering.max.kbytes`: Maximum total message size sum allowed on the producer queue.
+- If the Cargo build was successful, it would generate a `.so` file in ./target/release folder
+- Add the version to the end of the `.so` file, i.e. `libsolana_accountsdb_plugin_kafka_v1.13.3.so`
+- Update the file to **solana-geyser-plugin-lib** S3 bucket [https://s3.console.aws.amazon.com/s3/buckets/solana-geyser-plugin-lib?region=us-east-1&tab=objects](https://s3.console.aws.amazon.com/s3/buckets/solana-geyser-plugin-lib?region=us-east-1&tab=objects)
+- Run AWX upgrade_nodes.yml file on geyser plugin nodes to update it
