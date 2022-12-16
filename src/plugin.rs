@@ -18,7 +18,7 @@ use {
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
-        GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfo,
+        GeyserPlugin, GeyserPluginError as PluginError,
         ReplicaAccountInfoVersions, ReplicaTransactionInfo, ReplicaTransactionInfoVersions,
         Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
@@ -98,22 +98,44 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
-        let info = Self::unwrap_update_account(account);
-        if !self.unwrap_filter().wants_program(info.owner)
-            && !self.unwrap_filter().wants_account(info.pubkey)
-        {
-            return Ok(());
-        }
+        let event = match account {
+            ReplicaAccountInfoVersions::V0_0_1(info) => {
+                if !self.unwrap_filter().wants_program(info.owner)
+                    && !self.unwrap_filter().wants_account(info.pubkey)
+                {
+                    return Ok(());
+                }
 
-        let event = UpdateAccountEvent {
-            slot,
-            pubkey: info.pubkey.to_vec(),
-            lamports: info.lamports,
-            owner: info.owner.to_vec(),
-            executable: info.executable,
-            rent_epoch: info.rent_epoch,
-            data: info.data.to_vec(),
-            write_version: info.write_version,
+                UpdateAccountEvent {
+                    slot,
+                    pubkey: info.pubkey.to_vec(),
+                    lamports: info.lamports,
+                    owner: info.owner.to_vec(),
+                    executable: info.executable,
+                    rent_epoch: info.rent_epoch,
+                    data: info.data.to_vec(),
+                    write_version: info.write_version,
+                    txn_signature: Vec::new(),
+                }
+            },
+            ReplicaAccountInfoVersions::V0_0_2(info) => {
+                if !self.unwrap_filter().wants_program(info.owner)
+                    && !self.unwrap_filter().wants_account(info.pubkey)
+                {
+                    return Ok(());
+                }
+
+                UpdateAccountEvent {
+                    slot,
+                    pubkey: info.pubkey.to_vec(),
+                    lamports: info.lamports,
+                    owner: info.owner.to_vec(),
+                    executable: info.executable,
+                    rent_epoch: info.rent_epoch,
+                    data: info.data.to_vec(),
+                    write_version: info.write_version,
+                }
+            },
         };
 
         let publisher = self.unwrap_publisher();
@@ -195,12 +217,6 @@ impl KafkaPlugin {
 
     fn unwrap_filter(&self) -> &Filter {
         self.filter.as_ref().expect("filter is unavailable")
-    }
-
-    fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfo {
-        match account {
-            ReplicaAccountInfoVersions::V0_0_1(info) => info,
-        }
     }
 
     fn unwrap_notify_transaction(
