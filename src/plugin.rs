@@ -18,9 +18,9 @@ use {
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
-        GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfo,
-        ReplicaAccountInfoVersions, ReplicaTransactionInfo, ReplicaTransactionInfoVersions,
-        Result as PluginResult, SlotStatus as PluginSlotStatus,
+        GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoVersions,
+        ReplicaTransactionInfoV2, ReplicaTransactionInfoVersions, Result as PluginResult,
+        SlotStatus as PluginSlotStatus,
     },
     std::fmt::{Debug, Formatter},
 };
@@ -98,22 +98,29 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
-        let info = Self::unwrap_update_account(account);
-        if !self.unwrap_filter().wants_program(info.owner)
-            && !self.unwrap_filter().wants_account(info.pubkey)
-        {
-            return Ok(());
-        }
+        let event = match account {
+            ReplicaAccountInfoVersions::V0_0_1(_info) => {
+                unreachable!("ReplicaAccountInfoVersions::V0_0_1 is not supported")
+            }
+            ReplicaAccountInfoVersions::V0_0_2(info) => {
+                if !self.unwrap_filter().wants_program(info.owner)
+                    && !self.unwrap_filter().wants_account(info.pubkey)
+                {
+                    return Ok(());
+                }
 
-        let event = UpdateAccountEvent {
-            slot,
-            pubkey: info.pubkey.to_vec(),
-            lamports: info.lamports,
-            owner: info.owner.to_vec(),
-            executable: info.executable,
-            rent_epoch: info.rent_epoch,
-            data: info.data.to_vec(),
-            write_version: info.write_version,
+                UpdateAccountEvent {
+                    slot,
+                    pubkey: info.pubkey.to_vec(),
+                    lamports: info.lamports,
+                    owner: info.owner.to_vec(),
+                    executable: info.executable,
+                    rent_epoch: info.rent_epoch,
+                    data: info.data.to_vec(),
+                    write_version: info.write_version,
+                    txn_signature: info.txn_signature.map(|s| s.as_ref().to_vec()),
+                }
+            }
         };
 
         let publisher = self.unwrap_publisher();
@@ -155,7 +162,12 @@ impl GeyserPlugin for KafkaPlugin {
         }
 
         let filter = self.unwrap_filter();
-        let transaction = Self::unwrap_notify_transaction(transaction);
+        let transaction = match transaction {
+            ReplicaTransactionInfoVersions::V0_0_1(_info) => {
+                unreachable!("ReplicaTransactionInfoVersions::V0_0_1 is not supported")
+            }
+            ReplicaTransactionInfoVersions::V0_0_2(info) => info,
+        };
         if !transaction
             .transaction
             .message()
@@ -197,20 +209,6 @@ impl KafkaPlugin {
         self.filter.as_ref().expect("filter is unavailable")
     }
 
-    fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfo {
-        match account {
-            ReplicaAccountInfoVersions::V0_0_1(info) => info,
-        }
-    }
-
-    fn unwrap_notify_transaction(
-        transaction: ReplicaTransactionInfoVersions,
-    ) -> &ReplicaTransactionInfo {
-        match transaction {
-            ReplicaTransactionInfoVersions::V0_0_1(info) => info,
-        }
-    }
-
     fn build_compiled_instruction(
         ix: &solana_program::instruction::CompiledInstruction,
     ) -> CompiledInstruction {
@@ -249,15 +247,18 @@ impl KafkaPlugin {
 
     fn build_transaction_event(
         slot: u64,
-        transaction: &ReplicaTransactionInfo,
-    ) -> TransactionEvent {
-        let transaction_status_meta = transaction.transaction_status_meta;
-        let signature = transaction.signature;
-        let is_vote = transaction.is_vote;
-        let transaction = transaction.transaction;
-        TransactionEvent {
+        ReplicaTransactionInfoV2 {
+            signature,
             is_vote,
+            transaction,
+            transaction_status_meta,
+            index,
+        }: &ReplicaTransactionInfoV2,
+    ) -> TransactionEvent {
+        TransactionEvent {
+            is_vote: *is_vote,
             slot,
+            index: *index as u64,
             signature: signature.as_ref().into(),
             transaction_status_meta: Some(TransactionStatusMeta {
                 is_status_err: transaction_status_meta.status.is_err(),

@@ -32,6 +32,9 @@ message UpdateAccountEvent {
   // with higher write_version should supersede the one with lower
   // write_version.
   uint64 write_version = 8;
+
+  // The transaction signature that triggered this write
+  optional bytes txn_signature = 9;
 }
 
 message SlotStatusEvent {
@@ -162,4 +165,5 @@ message TransactionEvent {
   SanitizedTransaction transaction = 3;
   TransactionStatusMeta transaction_status_meta = 4;
   uint64 slot = 5;
+  uint64 index = 6;
 }
