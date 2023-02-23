@@ -94,6 +94,7 @@ message V0Message {
 message V0LoadedMessage {
   V0Message message_ = 1;
   LoadedAddresses loaded_adresses = 2;
+  repeated bool is_writable_account_cache = 3;
 }
 
 message LegacyMessage {
@@ -103,9 +104,14 @@ message LegacyMessage {
   repeated CompiledInstruction instructions = 4;
 }
 
+message LegacyLoadedMessage {
+  LegacyMessage message_ = 1;
+  repeated bool is_writable_account_cache = 2;
+}
+
 message SanitizedMessage {
   oneof message_payload {
-    LegacyMessage legacy = 1;
+    LegacyLoadedMessage legacy = 1;
     V0LoadedMessage v0 = 2;
   }
 }
