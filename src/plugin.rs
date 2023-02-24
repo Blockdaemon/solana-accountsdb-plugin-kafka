@@ -305,20 +305,27 @@ impl KafkaPlugin {
                 message: Some(SanitizedMessage {
                     message_payload: Some(match transaction.message() {
                         solana_program::message::SanitizedMessage::Legacy(lv) => {
-                            sanitized_message::MessagePayload::Legacy(LegacyMessage {
-                                header: Some(Self::build_message_header(&lv.header)),
-                                account_keys: lv
-                                    .account_keys
-                                    .clone()
-                                    .into_iter()
-                                    .map(|k| k.as_ref().into())
+                            sanitized_message::MessagePayload::Legacy(LegacyLoadedMessage {
+                                message: Some(LegacyMessage {
+                                    header: Some(Self::build_message_header(&lv.message.header)),
+                                    account_keys: lv
+                                        .message
+                                        .account_keys
+                                        .clone()
+                                        .into_iter()
+                                        .map(|k| k.as_ref().into())
+                                        .collect(),
+                                    instructions: lv
+                                        .message
+                                        .instructions
+                                        .iter()
+                                        .map(Self::build_compiled_instruction)
+                                        .collect(),
+                                    recent_block_hash: lv.message.recent_blockhash.as_ref().into(),
+                                }),
+                                is_writable_account_cache: (0..(lv.account_keys().len() - 1))
+                                    .map(|i: usize| lv.is_writable(i))
                                     .collect(),
-                                instructions: lv
-                                    .instructions
-                                    .iter()
-                                    .map(Self::build_compiled_instruction)
-                                    .collect(),
-                                recent_block_hash: lv.recent_blockhash.as_ref().into(),
                             })
                         }
                         solana_program::message::SanitizedMessage::V0(v0) => {
@@ -375,6 +382,9 @@ impl KafkaPlugin {
                                         .map(|x| x.as_ref().into())
                                         .collect(),
                                 }),
+                                is_writable_account_cache: (0..(v0.account_keys().len() - 1))
+                                    .map(|i: usize| v0.is_writable(i))
+                                    .collect(),
                             })
                         }
                     }),

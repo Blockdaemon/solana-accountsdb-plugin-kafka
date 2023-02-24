@@ -30,7 +30,7 @@ Config is specified via the plugin's JSON config file.
 
 ```json
 {
-  "libpath": "/solana/target/release/libsolana_accountsdb_plugin_kafka.so",
+  "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
   "kafka": {
     "bootstrap.servers": "localhost:9092",
     "request.required.acks": "1",
@@ -41,6 +41,7 @@ Config is specified via the plugin's JSON config file.
   "shutdown_timeout_ms": 30000,
   "update_account_topic": "solana.testnet.account_updates",
   "slot_status_topic": "solana.testnet.slot_status",
+  "transaction_topic": "solana.testnet.transactions",
   "publish_all_accounts": false,
   "program_ignores": [
     "Sysvar1111111111111111111111111111111111111",
