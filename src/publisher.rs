@@ -77,6 +77,6 @@ impl Publisher {
 
 impl Drop for Publisher {
     fn drop(&mut self) {
-        self.producer.flush(self.shutdown_timeout);
+        let _ = self.producer.flush(self.shutdown_timeout);
     }
 }
