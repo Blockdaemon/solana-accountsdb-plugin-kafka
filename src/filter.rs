@@ -33,8 +33,8 @@ impl Filter {
         }
     }
 
-    pub fn wants_program(&self, program: &[u8]) -> bool {
-        let key = match <&[u8; 32]>::try_from(program) {
+    pub fn wants_account_key(&self, account_key: &[u8]) -> bool {
+        let key = match <&[u8; 32]>::try_from(account_key) {
             Ok(key) => key,
             _ => return true,
         };
@@ -59,12 +59,12 @@ mod tests {
         let filter = Filter::new(&config);
         assert_eq!(filter.program_ignores.len(), 2);
 
-        assert!(filter.wants_program(
+        assert!(filter.wants_account_key(
             &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
                 .unwrap()
                 .to_bytes()
         ));
-        assert!(!filter.wants_program(
+        assert!(!filter.wants_account_key(
             &Pubkey::from_str("Vote111111111111111111111111111111111111111")
                 .unwrap()
                 .to_bytes()
