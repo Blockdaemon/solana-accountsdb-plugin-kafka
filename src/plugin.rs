@@ -14,14 +14,15 @@
 
 use {
     crate::*,
-    log::info,
+    log::{debug, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV2,
-        ReplicaAccountInfoVersions, ReplicaTransactionInfoVersions, Result as PluginResult,
-        SlotStatus as PluginSlotStatus,
+        ReplicaAccountInfoVersions, ReplicaTransactionInfoV2, ReplicaTransactionInfoVersions,
+        Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
+    solana_program::pubkey::Pubkey,
     std::fmt::{Debug, Formatter},
 };
 
@@ -90,7 +91,8 @@ impl GeyserPlugin for KafkaPlugin {
         }
 
         let info = Self::unwrap_update_account(account);
-        if !self.unwrap_filter().wants_program(info.owner) {
+        if !self.unwrap_filter().wants_account_key(info.owner) {
+            Self::log_ignore_account_update(info);
             return Ok(());
         }
 
@@ -144,7 +146,23 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
-        let event = Self::build_transaction_event(slot, transaction);
+        let info = Self::unwrap_transaction(transaction);
+        let maybe_ignored = info
+            .transaction
+            .message()
+            .account_keys()
+            .iter()
+            .find(|key| !self.unwrap_filter().wants_account_key(&key.to_bytes()));
+        if maybe_ignored.is_some() {
+            debug!(
+                "Ignoring transaction {:?} due to account key: {:?}",
+                info.signature,
+                &maybe_ignored.unwrap()
+            );
+            return Ok(());
+        }
+
+        let event = Self::build_transaction_event(slot, info);
 
         publisher
             .update_transaction(event)
@@ -179,6 +197,17 @@ impl KafkaPlugin {
                 panic!("ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
             }
             ReplicaAccountInfoVersions::V0_0_2(info) => info,
+        }
+    }
+
+    fn unwrap_transaction(
+        transaction: ReplicaTransactionInfoVersions,
+    ) -> &ReplicaTransactionInfoV2 {
+        match transaction {
+            ReplicaTransactionInfoVersions::V0_0_1(_info) => {
+                panic!("ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+            }
+            ReplicaTransactionInfoVersions::V0_0_2(info) => info,
         }
     }
 
@@ -220,13 +249,8 @@ impl KafkaPlugin {
 
     fn build_transaction_event(
         slot: u64,
-        transaction: ReplicaTransactionInfoVersions,
+        transaction: &ReplicaTransactionInfoV2,
     ) -> TransactionEvent {
-        let transaction = if let ReplicaTransactionInfoVersions::V0_0_2(transaction) = transaction {
-            transaction
-        } else {
-            panic!("Unsupported ReplicaTransactionInfoVersions::V0_0_2, please upgrade your Solana node.")
-        };
         let transaction_status_meta = transaction.transaction_status_meta;
         let signature = transaction.signature;
         let is_vote = transaction.is_vote;
@@ -396,6 +420,19 @@ impl KafkaPlugin {
                     .map(|x| x.as_ref().into())
                     .collect(),
             }),
+        }
+    }
+
+    fn log_ignore_account_update(info: &ReplicaAccountInfoV2) {
+        if log_enabled!(::log::Level::Debug) {
+            match <&[u8; 32]>::try_from(info.owner) {
+                Ok(key) => debug!(
+                    "Ignoring update for account key: {:?}",
+                    Pubkey::new_from_array(*key)
+                ),
+                // Err should never happen because wants_account_key only returns false if the input is &[u8; 32]
+                Err(_err) => debug!("Ignoring update for account key: {:?}", info.owner),
+            };
         }
     }
 }
