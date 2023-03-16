@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 prost = "0.11"
-rdkafka = { version = "0.28", features = ["ssl-vendored", "sasl"] }
+rdkafka = { version = "0.29", features = ["ssl", "sasl"] }
 solana-geyser-plugin-interface = { version = "=1.10.32" }
 solana-logger = { version = "=1.10.32" }
 solana-program = { version = "=1.10.32" }
