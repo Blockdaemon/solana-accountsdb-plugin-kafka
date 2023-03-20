@@ -20,9 +20,23 @@ jobs:
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
       - if: runner.os == 'Linux'
+        env:
+          PB_REL: https://github.com/protocolbuffers/protobuf/releases
+          PROTOC_VERSION: '22.0'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libudev-dev libssl-dev libsasl2-dev libzstd-dev
+          sudo apt-get install -y \
+            curl \
+            libudev-dev \
+            libsasl2-dev \
+            libssl-dev \
+            libzstd-dev \
+            unzip
+          echo 'installing protoc'
+          curl -LO $PB_REL/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
+          unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d $HOME/.local
+          export PATH="$PATH:$HOME/.local/bin"
+          protoc --version
 
       - uses: actions-rs/toolchain@v1
         with:
