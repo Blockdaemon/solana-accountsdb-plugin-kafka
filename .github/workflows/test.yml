@@ -20,23 +20,20 @@ jobs:
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
       - if: runner.os == 'Linux'
-        env:
-          PB_REL: https://github.com/protocolbuffers/protobuf/releases
-          PROTOC_VERSION: '22.0'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            curl \
+            gnupg \
             libudev-dev \
             libsasl2-dev \
             libssl-dev \
-            libzstd-dev \
-            unzip
-          echo 'installing protoc'
-          curl -LO $PB_REL/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
-          unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d $HOME/.local
-          export PATH="$PATH:$HOME/.local/bin"
-          protoc --version
+            libzstd-dev
+          sudo touch /etc/apt/sources.list.d/debian.list
+          echo 'deb http://ftp.debian.org/debian sid main' | sudo tee -a /etc/apt/sources.list.d/debian.list
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
 
       - uses: actions-rs/toolchain@v1
         with:
