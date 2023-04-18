@@ -11,7 +11,7 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-prost = "0.11"
+prost = "0.10"
 rdkafka = { version = "0.29", features = ["ssl", "sasl"] }
 solana-geyser-plugin-interface = { version = "=1.10.32" }
 solana-logger = { version = "=1.10.32" }
