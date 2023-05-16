@@ -1,6 +1,8 @@
 use std::io::Result;
 
 fn main() -> Result<()> {
-    prost_build::compile_protos(&["proto/event.proto"], &["proto/"])?;
+    let mut config = prost_build::Config::new();
+    config.boxed(".blockdaemon.solana.accountsdb_plugin_kafka.types.MessageWrapper");
+    config.compile_protos(&["proto/event.proto"], &["proto/"])?;
     Ok(())
 }
