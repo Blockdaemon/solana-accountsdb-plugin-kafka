@@ -43,6 +43,7 @@ Config is specified via the plugin's JSON config file.
   "slot_status_topic": "solana.testnet.slot_status",
   "transaction_topic": "solana.testnet.transactions",
   "publish_all_accounts": false,
+  "wrap_messages": false,
   "program_ignores": [
     "Sysvar1111111111111111111111111111111111111",
     "Vote111111111111111111111111111111111111111"
@@ -59,7 +60,32 @@ Config is specified via the plugin's JSON config file.
 - `update_account_topic`: Topic name of account updates. Omit to disable.
 - `slot_status_topic`: Topic name of slot status update. Omit to disable.
 - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
-- `program_ignores`: Solana program IDs for which to ignore updates for owned accounts.
+- `wrap_messages`: Wrap all messages in a unified wrapper object. Omit to disable (see Message Wrapping below).
+- `program_ignores`: Account addresses to ignore (see Filtering below).
+
+### Message Keys
+
+The message types are keyed as follows:
+- **Account update:** account address (public key)
+- **Slot status:** slot number
+- **Transaction notification:** transaction signature
+
+### Filtering
+
+If `program_ignores` are specified, then these addresses will be filtered out of the account updates
+and transaction notifications.  More specifically, account update messages for these accounts will not be emitted,
+and transaction notifications for any transaction involving these accounts will not be emitted.
+
+### Message Wrapping
+
+In some cases it may be desirable to send multiple types of messages to the same topic,
+for instance to preserve relative order.  In this case it is helpful if all messages conform to a single schema.
+Setting `wrap_messages` to true will wrap all three message types in a uniform wrapper object so that they
+conform to a single schema.
+
+Note that if `wrap_messages` is true, in order to avoid key collision, the message keys are prefixed with a single byte,
+which is dependent on the type of the message being wrapped.  Account update message keys are prefixed with
+65 (A), slot status keys with 83 (S), and transaction keys with 84 (T).
 
 ## Buffering
 

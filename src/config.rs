@@ -49,6 +49,9 @@ pub struct Config {
     /// Publish all accounts on startup.
     #[serde(default)]
     pub publish_all_accounts: bool,
+    /// Wrap all event message in a single message type.
+    #[serde(default)]
+    pub wrap_messages: bool,
 }
 
 impl Default for Config {
@@ -61,6 +64,7 @@ impl Default for Config {
             transaction_topic: "".to_owned(),
             program_ignores: Vec::new(),
             publish_all_accounts: false,
+            wrap_messages: false,
         }
     }
 }

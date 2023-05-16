@@ -172,3 +172,11 @@ message TransactionEvent {
   TransactionStatusMeta transaction_status_meta = 4;
   uint64 slot = 5;
 }
+
+message MessageWrapper {
+  oneof event_message {
+    UpdateAccountEvent account = 1;
+    SlotStatusEvent slot = 2;
+    TransactionEvent transaction = 3;
+  }
+}
