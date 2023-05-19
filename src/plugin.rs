@@ -331,19 +331,21 @@ impl KafkaPlugin {
                     message_payload: Some(match transaction.message() {
                         solana_program::message::SanitizedMessage::Legacy(lv) => {
                             sanitized_message::MessagePayload::Legacy(LegacyMessage {
-                                header: Some(Self::build_message_header(&lv.header)),
+                                header: Some(Self::build_message_header(&lv.message.header)),
                                 account_keys: lv
+                                    .message
                                     .account_keys
                                     .clone()
                                     .into_iter()
                                     .map(|k| k.as_ref().into())
                                     .collect(),
                                 instructions: lv
+                                    .message
                                     .instructions
                                     .iter()
                                     .map(Self::build_compiled_instruction)
                                     .collect(),
-                                recent_block_hash: lv.recent_blockhash.as_ref().into(),
+                                recent_block_hash: lv.message.recent_blockhash.as_ref().into(),
                             })
                         }
                         solana_program::message::SanitizedMessage::V0(v0) => {
