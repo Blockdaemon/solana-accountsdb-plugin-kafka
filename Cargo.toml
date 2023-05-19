@@ -36,6 +36,10 @@ vergen = "=7.2.1"
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
+[profile.release]
+codegen-units = 1
+lto = true
+
 [patch.crates-io]
 solana-geyser-plugin-interface = { git = "https://github.com/rpcpool/solana-public.git", tag = "v1.14.17-geyser-block-v2" }
 solana-logger = { git = "https://github.com/rpcpool/solana-public.git", tag = "v1.14.17-geyser-block-v2" }
