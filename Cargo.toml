@@ -11,20 +11,20 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-prost = "0.10"
-rdkafka = { version = "0.28", features = ["ssl-vendored", "sasl"] }
+hyper = { version = "0.14.26", features = ["server"] }
+lazy_static = "1.4.0"
+log = "0.4.0"
+prometheus = "0.13.3"
+prost = "0.10.3"
+rdkafka = { version = "0.28.0", features = ["ssl-vendored", "sasl"] }
+serde = { version = "1.0.147", features = ["derive"] }
+serde_json = "1.0.81"
+simple-error = "0.2.3"
 solana-geyser-plugin-interface = "=1.14.17"
 solana-logger = "=1.14.17"
 solana-program = "=1.14.17"
 solana-transaction-status = "=1.14.17"
-log = "0.4"
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-simple-error = "0.2.3"
 tokio = { version = "1.14", features = ["rt-multi-thread", "time", "macros", "sync"] }
-prometheus = "0.13"
-hyper = { version = "0.14", features = ["server"] }
-lazy_static = "1"
 
 [build-dependencies]
 anyhow = "1"
