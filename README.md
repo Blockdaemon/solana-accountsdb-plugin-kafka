@@ -10,6 +10,12 @@ Find binary releases at: https://github.com/Blockdaemon/solana-accountsdb-plugin
 
 ### Building from source
 
+#### Prerequisites
+
+You will need version 3.12 or later of the protobuf compiler `protoc` installed.
+
+#### Build
+
 ```shell
 cargo build --release
 ```
