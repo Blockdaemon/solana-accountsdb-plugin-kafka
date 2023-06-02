@@ -18,7 +18,7 @@ solana-transaction-status = { version = "=1.14.18" }
 
 log = "*"
 prost = "*"
-rdkafka = { features = ["ssl", "sasl"] }
+rdkafka = { version = "0.31.0", features = ["ssl", "sasl"] }
 serde_json = { version = "~1" }
 serde = { version = "~1", features = ["derive"] }
 simple-error = "*"
