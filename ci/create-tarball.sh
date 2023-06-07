@@ -40,7 +40,6 @@ echo --- Creating release tarball
   # Make CHANNEL available to include in the software version information
   export CHANNEL
 
-  source ci/rust-version.sh stable
   ci/cargo-install-all.sh stable "${RELEASE_BASENAME}"
 
   tar cvf "${TARBALL_BASENAME}"-$TARGET.tar "${RELEASE_BASENAME}"
