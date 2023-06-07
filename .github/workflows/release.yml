@@ -17,7 +17,7 @@ jobs:
 
       - name: Set env vars
         run: |
-          source ci/rust-version.sh
+          rust_stable=$(rustc --version | awk '{print $2}')
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
       - if: runner.os == 'Linux'
