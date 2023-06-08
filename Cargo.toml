@@ -22,7 +22,7 @@ rdkafka = { version = "0.31.0", features = ["ssl", "sasl"] }
 serde_json = { version = "~1" }
 serde = { version = "~1", features = ["derive"] }
 simple-error = "*"
-toml_datetime = { version = "=0.6.1" } # 0.6.2 requires rust 1.64.0
+toml_datetime = { version = "=0.6.2" } # 0.6.2 requires rust 1.64.0
 toml_edit = { version = "=0.19.8" } # 0.19.9 requires rust 1.64.0
 winnow = { version = "=0.4.1" } # 0.4.2 requires rust 1.64.0
 
