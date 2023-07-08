@@ -16,6 +16,7 @@ solana-logger = { version = "=1.14.19" }
 solana-program = { version = "=1.14.19" }
 solana-transaction-status = { version = "=1.14.19" }
 
+blake3 = { version = "=1.4.0" } # 1.4.1 requires constant_time_eq 0.3.0 which requires rust 1.66.0
 log = "*"
 prost = "*"
 rdkafka = { version = "0.31.0", features = ["ssl", "sasl"] }
