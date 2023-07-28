@@ -1,15 +1,17 @@
-use {
-    cargo_lock::Lockfile,
-    std::collections::HashSet,
-    vergen::{vergen, Config},
-};
+use {cargo_lock::Lockfile, std::collections::HashSet};
 
 fn main() -> anyhow::Result<()> {
     // Proto
     prost_build::compile_protos(&["proto/event.proto"], &["proto/"])?;
 
     // Version metrics
-    vergen(Config::default())?;
+    let mut envs = vergen::EmitBuilder::builder();
+    envs.all_build()
+        .all_cargo()
+        .all_git()
+        .all_rustc()
+        .all_sysinfo();
+    envs.emit()?;
 
     // vergen git version does not looks cool
     println!(
@@ -21,16 +23,20 @@ fn main() -> anyhow::Result<()> {
     let lockfile = Lockfile::load("./Cargo.lock")?;
     println!(
         "cargo:rustc-env=SOLANA_SDK_VERSION={}",
-        lockfile
-            .packages
-            .iter()
-            .filter(|pkg| pkg.name.as_str() == "solana-sdk")
-            .map(|pkg| pkg.version.to_string())
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect::<Vec<_>>()
-            .join(",")
+        get_pkg_version(&lockfile, "solana-sdk")
     );
 
     Ok(())
+}
+
+fn get_pkg_version(lockfile: &Lockfile, pkg_name: &str) -> String {
+    lockfile
+        .packages
+        .iter()
+        .filter(|pkg| pkg.name.as_str() == pkg_name)
+        .map(|pkg| pkg.version.to_string())
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>()
+        .join(",")
 }

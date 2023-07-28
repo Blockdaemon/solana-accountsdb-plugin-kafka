@@ -10,19 +10,33 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+    runs-on: ["${{ matrix.os }}"]
     steps:
       - uses: actions/checkout@v2
 
       - name: Set env vars
         run: |
-          source ci/rust-version.sh
+          rust_stable=$(rustc --version | awk '{print $2}')
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
       - if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libudev-dev libssl-dev libsasl2-dev libzstd-dev
+          sudo apt-get install -y \
+            gnupg \
+            libudev-dev \
+            libsasl2-dev \
+            libssl-dev \
+            libzstd-dev
+          sudo touch /etc/apt/sources.list.d/debian.list
+          echo 'deb http://ftp.debian.org/debian sid main' | sudo tee -a /etc/apt/sources.list.d/debian.list
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -31,12 +45,12 @@ jobs:
           profile: minimal
           components: rustfmt, clippy
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: cargo-build-${{ hashFiles('**/Cargo.lock') }}-${{ env.RUST_STABLE}}
+          key: ${{ matrix.os }}-cargo-build-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}-${{ env.RUST_STABLE }}
 
       - name: cargo fmt
         uses: actions-rs/cargo@v1

@@ -117,9 +117,15 @@ message SanitizedTransaction {
   repeated bytes signatures = 4;
 }
 
-message InnerInstruction {
+// https://github.com/solana-labs/solana/pull/28430/files
+message InnerInstructions {
   uint32 index = 1;
-  repeated CompiledInstruction instructions = 2;
+  repeated InnerInstruction instructions = 2;
+}
+
+message InnerInstruction {
+  CompiledInstruction instruction = 1;
+  optional uint32 stack_height = 2;
 }
 
 message UiTokenAmount {
@@ -151,7 +157,7 @@ message TransactionStatusMeta {
   uint64 fee = 3;
   repeated uint64 pre_balances = 4;
   repeated uint64 post_balances = 5;
-  repeated InnerInstruction inner_instructions = 6;
+  repeated InnerInstructions inner_instructions = 6;
   repeated string log_messages = 7;
   repeated TransactionTokenBalance pre_token_balances = 8;
   repeated TransactionTokenBalance post_token_balances = 9;
