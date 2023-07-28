@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use {
-    crate::*,
+    crate::Config,
     solana_program::pubkey::Pubkey,
     std::{collections::HashSet, str::FromStr},
 };
@@ -65,7 +65,11 @@ impl Filter {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use {
+        crate::{Config, Filter},
+        solana_program::pubkey::Pubkey,
+        std::str::FromStr,
+    };
 
     #[test]
     fn test_filter() {

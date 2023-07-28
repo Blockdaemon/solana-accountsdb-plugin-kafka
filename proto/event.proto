@@ -33,7 +33,7 @@ message UpdateAccountEvent {
   // write_version.
   uint64 write_version = 8;
 
-  // The transaction signature that triggered this write
+  // First signature of the transaction caused this account modification
   optional bytes txn_signature = 9;
 }
 
@@ -94,6 +94,7 @@ message V0Message {
 message V0LoadedMessage {
   V0Message message_ = 1;
   LoadedAddresses loaded_adresses = 2;
+  repeated bool is_writable_account_cache = 3;
 }
 
 message LegacyMessage {
@@ -103,9 +104,14 @@ message LegacyMessage {
   repeated CompiledInstruction instructions = 4;
 }
 
+message LegacyLoadedMessage {
+  LegacyMessage message_ = 1;
+  repeated bool is_writable_account_cache = 2;
+}
+
 message SanitizedMessage {
   oneof message_payload {
-    LegacyMessage legacy = 1;
+    LegacyLoadedMessage legacy = 1;
     V0LoadedMessage v0 = 2;
   }
 }
@@ -172,4 +178,12 @@ message TransactionEvent {
   TransactionStatusMeta transaction_status_meta = 4;
   uint64 slot = 5;
   uint64 index = 6;
+}
+
+message MessageWrapper {
+  oneof event_message {
+    UpdateAccountEvent account = 1;
+    SlotStatusEvent slot = 2;
+    TransactionEvent transaction = 3;
+  }
 }
