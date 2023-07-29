@@ -13,8 +13,9 @@
 // limitations under the License.
 
 use {
+    crate::{prom::StatsThreadedProducerContext, PrometheusService},
     rdkafka::{
-        config::FromClientConfig,
+        config::FromClientConfigAndContext,
         error::KafkaResult,
         producer::{DefaultProducerContext, ThreadedProducer},
         ClientConfig,
@@ -23,7 +24,7 @@ use {
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPluginError, Result as PluginResult,
     },
-    std::{collections::HashMap, fs::File, path::Path},
+    std::{collections::HashMap, fs::File, io::Result as IoResult, net::SocketAddr, path::Path},
 };
 
 /// Plugin config.
@@ -52,6 +53,9 @@ pub struct Config {
     /// Wrap all event message in a single message type.
     #[serde(default)]
     pub wrap_messages: bool,
+    /// Prometheus endpoint.
+    #[serde(default)]
+    pub prometheus: Option<SocketAddr>,
 }
 
 impl Default for Config {
@@ -65,6 +69,7 @@ impl Default for Config {
             program_ignores: Vec::new(),
             publish_all_accounts: false,
             wrap_messages: false,
+            prometheus: None,
         }
     }
 }
@@ -80,12 +85,12 @@ impl Config {
     }
 
     /// Create rdkafka::FutureProducer from config.
-    pub fn producer(&self) -> KafkaResult<Producer> {
+    pub fn producer(&self) -> KafkaResult<ThreadedProducer<StatsThreadedProducerContext>> {
         let mut config = ClientConfig::new();
         for (k, v) in self.kafka.iter() {
             config.set(k, v);
         }
-        ThreadedProducer::from_config(&config)
+        ThreadedProducer::from_config_and_context(&config, StatsThreadedProducerContext::default())
     }
 
     fn set_default(&mut self, k: &'static str, v: &'static str) {
@@ -99,6 +104,10 @@ impl Config {
         self.set_default("message.timeout.ms", "30000");
         self.set_default("compression.type", "lz4");
         self.set_default("partitioner", "murmur2_random");
+    }
+
+    pub fn create_prometheus(&self) -> IoResult<Option<PrometheusService>> {
+        self.prometheus.map(PrometheusService::new).transpose()
     }
 }
 

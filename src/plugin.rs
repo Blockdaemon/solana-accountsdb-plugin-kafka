@@ -13,8 +13,15 @@
 // limitations under the License.
 
 use {
-    crate::*,
-    log::{debug, info, log_enabled},
+    crate::{
+        sanitized_message, CompiledInstruction, Config, Filter, InnerInstruction,
+        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
+        MessageAddressTableLookup, MessageHeader, PrometheusService, Publisher, Reward,
+        SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
+        TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
+        V0LoadedMessage, V0Message,
+    },
+    log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
     simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
@@ -31,6 +38,7 @@ pub struct KafkaPlugin {
     publisher: Option<Publisher>,
     filter: Option<Filter>,
     publish_all_accounts: bool,
+    prometheus: Option<PrometheusService>,
 }
 
 impl Debug for KafkaPlugin {
@@ -62,14 +70,19 @@ impl GeyserPlugin for KafkaPlugin {
         let (version_n, version_s) = get_rdkafka_version();
         info!("rd_kafka_version: {:#08x}, {}", version_n, version_s);
 
-        let producer = config
-            .producer()
-            .map_err(|e| PluginError::Custom(Box::new(e)))?;
+        let producer = config.producer().map_err(|error| {
+            error!("Failed to create kafka producer: {error:?}");
+            PluginError::Custom(Box::new(error))
+        })?;
         info!("Created rdkafka::FutureProducer");
 
         let publisher = Publisher::new(producer, &config);
+        let prometheus = config
+            .create_prometheus()
+            .map_err(|error| PluginError::Custom(Box::new(error)))?;
         self.publisher = Some(publisher);
         self.filter = Some(Filter::new(&config));
+        self.prometheus = prometheus;
         info!("Spawned producer");
 
         Ok(())
@@ -78,6 +91,9 @@ impl GeyserPlugin for KafkaPlugin {
     fn on_unload(&mut self) {
         self.publisher = None;
         self.filter = None;
+        if let Some(prometheus) = self.prometheus.take() {
+            prometheus.shutdown();
+        }
     }
 
     fn update_account(
