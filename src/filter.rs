@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use {
-    crate::*,
+    crate::Config,
     solana_program::pubkey::Pubkey,
     std::{collections::HashSet, str::FromStr},
 };

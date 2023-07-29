@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::message_wrapper::EventMessage;
-use crate::message_wrapper::EventMessage::{Account, Slot, Transaction};
 use {
-    crate::*,
+    crate::{
+        message_wrapper::EventMessage::{self, Account, Slot, Transaction},
+        prom::{
+            StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
+            UPLOAD_TRANSACTIONS_TOTAL,
+        },
+        Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
+    },
     prost::Message,
     rdkafka::{
         error::KafkaError,
-        producer::{BaseRecord, Producer as KafkaProducer},
+        producer::{BaseRecord, Producer, ThreadedProducer},
     },
     std::time::Duration,
 };
 
 pub struct Publisher {
-    producer: Producer,
+    producer: ThreadedProducer<StatsThreadedProducerContext>,
     shutdown_timeout: Duration,
 
     update_account_topic: String,
@@ -36,7 +41,7 @@ pub struct Publisher {
 }
 
 impl Publisher {
-    pub fn new(producer: Producer, config: &Config) -> Self {
+    pub fn new(producer: ThreadedProducer<StatsThreadedProducerContext>, config: &Config) -> Self {
         Self {
             producer,
             shutdown_timeout: Duration::from_millis(config.shutdown_timeout_ms),
@@ -58,7 +63,11 @@ impl Publisher {
         let record = BaseRecord::<Vec<u8>, _>::to(&self.update_account_topic)
             .key(key)
             .payload(&buf);
-        self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
+        let result = self.producer.send(record).map(|_| ()).map_err(|(e, _)| e);
+        UPLOAD_ACCOUNTS_TOTAL
+            .with_label_values(&[if result.is_ok() { "success" } else { "failed" }])
+            .inc();
+        result
     }
 
     pub fn update_slot_status(&self, ev: SlotStatusEvent) -> Result<(), KafkaError> {
@@ -73,7 +82,11 @@ impl Publisher {
         let record = BaseRecord::<Vec<u8>, _>::to(&self.slot_status_topic)
             .key(key)
             .payload(&buf);
-        self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
+        let result = self.producer.send(record).map(|_| ()).map_err(|(e, _)| e);
+        UPLOAD_SLOTS_TOTAL
+            .with_label_values(&[if result.is_ok() { "success" } else { "failed" }])
+            .inc();
+        result
     }
 
     pub fn update_transaction(&self, ev: TransactionEvent) -> Result<(), KafkaError> {
@@ -90,7 +103,11 @@ impl Publisher {
         let record = BaseRecord::<Vec<u8>, _>::to(&self.transaction_topic)
             .key(key)
             .payload(&buf);
-        self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
+        let result = self.producer.send(record).map(|_| ()).map_err(|(e, _)| e);
+        UPLOAD_TRANSACTIONS_TOTAL
+            .with_label_values(&[if result.is_ok() { "success" } else { "failed" }])
+            .inc();
+        result
     }
 
     pub fn wants_update_account(&self) -> bool {

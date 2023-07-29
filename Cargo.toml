@@ -16,15 +16,23 @@ solana-logger = { version = "~1.16" }
 solana-program = "~1.16"
 solana-transaction-status = { version = "~1.16" }
 
+hyper = { version = "0.14.26", features = ["server"] }
+lazy_static = "1.4.0"
 log = "*"
+prometheus = "0.13.3"
 prost = "*"
 rdkafka = { version = "0.33.2", features = ["ssl", "sasl"] }
-serde_json = { version = "~1" }
 serde = { version = "~1", features = ["derive"] }
+serde_json = { version = "~1" }
 simple-error = "*"
+tokio = { version = "1.14", features = ["rt-multi-thread", "time", "macros", "sync"] }
 
 [build-dependencies]
+anyhow = "1.0.65"
+cargo-lock = "9.0.0"
+git-version = "0.3.5"
 prost-build = "*"
+vergen = { version = "8.2.1", features = ["build", "cargo", "git", "gitcl", "rustc", "si"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
