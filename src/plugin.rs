@@ -165,6 +165,7 @@ impl GeyserPlugin for KafkaPlugin {
 
         let filter = self.unwrap_filter();
         let info = Self::unwrap_transaction(transaction);
+
         let maybe_ignored = info
             .transaction
             .message()
@@ -285,12 +286,13 @@ impl KafkaPlugin {
             is_vote,
             transaction,
             transaction_status_meta,
-            index: _index,
+            index,
         }: &ReplicaTransactionInfoV2,
     ) -> TransactionEvent {
         TransactionEvent {
             is_vote: *is_vote,
             slot,
+            index: *index as u64,
             signature: signature.as_ref().into(),
             transaction_status_meta: Some(TransactionStatusMeta {
                 is_status_err: transaction_status_meta.status.is_err(),

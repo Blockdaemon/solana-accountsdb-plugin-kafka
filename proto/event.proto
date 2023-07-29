@@ -177,6 +177,7 @@ message TransactionEvent {
   SanitizedTransaction transaction = 3;
   TransactionStatusMeta transaction_status_meta = 4;
   uint64 slot = 5;
+  uint64 index = 6;
 }
 
 message MessageWrapper {
