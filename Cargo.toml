@@ -24,7 +24,6 @@ prost = "*"
 rdkafka = { version = "0.33.2", features = ["ssl", "sasl"] }
 serde = { version = "~1", features = ["derive"] }
 serde_json = { version = "~1" }
-simple-error = "*"
 tokio = { version = "1.14", features = ["rt-multi-thread", "time", "macros", "sync"] }
 
 [build-dependencies]

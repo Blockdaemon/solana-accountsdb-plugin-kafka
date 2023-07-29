@@ -23,7 +23,6 @@ use {
     },
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
-    simple_error::simple_error,
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
         ReplicaAccountInfoVersions, ReplicaTransactionInfoV2, ReplicaTransactionInfoVersions,
@@ -54,8 +53,7 @@ impl GeyserPlugin for KafkaPlugin {
 
     fn on_load(&mut self, config_file: &str) -> PluginResult<()> {
         if self.publisher.is_some() {
-            let err = simple_error!("plugin already loaded");
-            return Err(PluginError::Custom(Box::new(err)));
+            return Err(PluginError::Custom("plugin already loaded".into()));
         }
 
         solana_logger::setup_with_default("info");
