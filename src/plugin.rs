@@ -107,7 +107,8 @@ impl GeyserPlugin for KafkaPlugin {
         }
 
         let info = Self::unwrap_update_account(account);
-        if !self.unwrap_filter().wants_account_key(info.owner) {
+        let filter = self.unwrap_filter();
+        if !filter.wants_program(info.owner) && !filter.wants_account(info.pubkey) {
             Self::log_ignore_account_update(info);
             return Ok(());
         }
@@ -162,18 +163,20 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
+        let filter = self.unwrap_filter();
         let info = Self::unwrap_transaction(transaction);
         let maybe_ignored = info
             .transaction
             .message()
             .account_keys()
             .iter()
-            .find(|key| !self.unwrap_filter().wants_account_key(&key.to_bytes()));
-        if maybe_ignored.is_some() {
+            .find(|pubkey| {
+                !(filter.wants_program(pubkey.as_ref()) || filter.wants_account(pubkey.as_ref()))
+            });
+        if let Some(ignored) = maybe_ignored {
             debug!(
                 "Ignoring transaction {:?} due to account key: {:?}",
-                info.signature,
-                &maybe_ignored.unwrap()
+                info.signature, ignored
             );
             return Ok(());
         }
@@ -277,14 +280,16 @@ impl KafkaPlugin {
 
     fn build_transaction_event(
         slot: u64,
-        transaction: &ReplicaTransactionInfoV2,
-    ) -> TransactionEvent {
-        let transaction_status_meta = transaction.transaction_status_meta;
-        let signature = transaction.signature;
-        let is_vote = transaction.is_vote;
-        let transaction = transaction.transaction;
-        TransactionEvent {
+        ReplicaTransactionInfoV2 {
+            signature,
             is_vote,
+            transaction,
+            transaction_status_meta,
+            index: _index,
+        }: &ReplicaTransactionInfoV2,
+    ) -> TransactionEvent {
+        TransactionEvent {
+            is_vote: *is_vote,
             slot,
             signature: signature.as_ref().into(),
             transaction_status_meta: Some(TransactionStatusMeta {
