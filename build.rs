@@ -1,4 +1,4 @@
-use {cargo_lock::Lockfile, std::collections::HashSet};
+use cargo_lock::Lockfile;
 
 fn main() -> anyhow::Result<()> {
     // Proto
@@ -9,11 +9,7 @@ fn main() -> anyhow::Result<()> {
 
     // Version metrics
     let mut envs = vergen::EmitBuilder::builder();
-    envs.all_build()
-        .all_cargo()
-        .all_git()
-        .all_rustc()
-        .all_sysinfo();
+    envs.all_build().all_rustc();
     envs.emit()?;
 
     // vergen git version does not looks cool
@@ -38,8 +34,6 @@ fn get_pkg_version(lockfile: &Lockfile, pkg_name: &str) -> String {
         .iter()
         .filter(|pkg| pkg.name.as_str() == pkg_name)
         .map(|pkg| pkg.version.to_string())
-        .collect::<HashSet<_>>()
-        .into_iter()
         .collect::<Vec<_>>()
         .join(",")
 }
