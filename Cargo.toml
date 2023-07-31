@@ -28,7 +28,7 @@ simple-error = "*"
 tokio = { version = "1.14", features = ["rt-multi-thread", "time", "macros", "sync"] }
 
 [build-dependencies]
-anyhow = "1.0.65"
+anyhow = "1.0.72"
 cargo-lock = "9.0.0"
 git-version = "0.3.5"
 prost-build = "*"
