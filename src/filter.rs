@@ -46,20 +46,20 @@ impl Filter {
     }
 
     pub fn wants_program(&self, program: &[u8]) -> bool {
-        let key = match <&[u8; 32]>::try_from(program) {
-            Ok(key) => key,
-            _ => return true,
-        };
-        !self.program_ignores.contains(key)
-            && (self.program_filters.is_empty() || self.program_filters.contains(key))
+        match <&[u8; 32]>::try_from(program) {
+            Ok(key) => {
+                !self.program_ignores.contains(key)
+                    && (self.program_filters.is_empty() || self.program_filters.contains(key))
+            }
+            Err(_error) => true,
+        }
     }
 
     pub fn wants_account(&self, account: &[u8]) -> bool {
-        let key = match <&[u8; 32]>::try_from(account) {
-            Ok(key) => key,
-            _ => return true,
-        };
-        self.account_filters.contains(key)
+        match <&[u8; 32]>::try_from(account) {
+            Ok(key) => self.account_filters.contains(key),
+            Err(_error) => true,
+        }
     }
 }
 

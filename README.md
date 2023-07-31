@@ -36,7 +36,7 @@ Config is specified via the plugin's JSON config file.
 
 ```json
 {
-  "libpath": "/solana/target/release/libsolana_accountsdb_plugin_kafka.so",
+  "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
   "kafka": {
     "bootstrap.servers": "localhost:9092",
     "request.required.acks": "1",
