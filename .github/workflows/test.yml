@@ -30,9 +30,9 @@ jobs:
             libudev-dev \
             libsasl2-dev \
             libssl-dev \
-            libzstd-dev 
+            libzstd-dev
 
-      - name: install protobuff 3.12 
+      - name: install protobuff 3.12
         if: matrix.os == 'ubuntu-20.04'
         run: |
           curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip

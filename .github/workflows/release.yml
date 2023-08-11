@@ -1,10 +1,5 @@
 on:
   push:
-    tags:
-      - 'v*'
-  pull_request:
-    paths:
-      - '.github/workflows/release.yml'
 
 env:
   CARGO_TERM_COLOR: always
@@ -23,7 +18,8 @@ jobs:
           rust_stable=$(rustc --version | awk '{print $2}')
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
-      - if: runner.os == 'Linux'
+      - name: instal dependencies for 20.04
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -32,12 +28,25 @@ jobs:
             libsasl2-dev \
             libssl-dev \
             libzstd-dev
-          sudo touch /etc/apt/sources.list.d/debian.list
-          echo 'deb http://ftp.debian.org/debian sid main' | sudo tee -a /etc/apt/sources.list.d/debian.list
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
+
+      - name: install protobuff 3.12
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip
+          unzip protoc-3.15.8-linux-x86_64.zip -d $HOME/.local
+          export PATH="$PATH:$HOME/.local/bin"
+
+      - name: Install dependencies for 22.04
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
           sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
+          sudo apt-get install -y \
+            gnupg \
+            libudev-dev \
+            libsasl2-dev \
+            libssl-dev \
+            libzstd-dev \
+            protobuf-compiler
 
       - uses: actions-rs/toolchain@v1
         with:
