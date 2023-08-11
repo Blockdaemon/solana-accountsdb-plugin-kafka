@@ -57,7 +57,7 @@ impl Filter {
 
     pub fn wants_account(&self, account: &[u8]) -> bool {
         match <&[u8; 32]>::try_from(account) {
-            Ok(key) => self.account_filters.contains(key),
+            Ok(key) => self.account_filters.is_empty() || self.account_filters.contains(key),
             Err(_error) => true,
         }
     }
