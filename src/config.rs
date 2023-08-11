@@ -56,6 +56,12 @@ pub struct Config {
     /// Publish all accounts on startup.
     #[serde(default)]
     pub publish_all_accounts: bool,
+    /// Publish vote transactions.
+    #[serde(default)]
+    pub include_vote_transactions: bool,
+    /// Publish failed transactions.
+    #[serde(default)]
+    pub include_failed_transactions: bool,
     /// Wrap all event message in a single message type.
     #[serde(default)]
     pub wrap_messages: bool,
@@ -76,6 +82,8 @@ impl Default for Config {
             program_filters: Vec::new(),
             account_filters: Vec::new(),
             publish_all_accounts: false,
+            include_vote_transactions: true,
+            include_failed_transactions: true,
             wrap_messages: false,
             prometheus: None,
         }
