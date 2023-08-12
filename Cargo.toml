@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.1.5+solana.1.14.23"
+version = "0.1.5+solana.1.14.24"
 edition = "2021"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-solana-geyser-plugin-interface = { version = "=1.14.23" }
+solana-geyser-plugin-interface = { version = "=1.14.24" }
 solana-logger = { version = "=1.14" }
 solana-program = { version = "=1.14" }
 solana-transaction-status = { version = "=1.14" }
@@ -28,7 +28,9 @@ winnow = { version = "=0.4.1" } # 0.4.2 requires rust 1.64.0
 
 [build-dependencies]
 prost-build = "0.11"
+cc = { version = "=1.0.81" } # 1.0.82 broken due to https://github.com/rust-lang/rust/issues/90829
 tempfile = { version = "=3.6.0" } # 3.7.0 requires rustix 0.38.0 which requires linux-raw-sys 0.4.0 and hence rust 1.63.0
+tokio = { version = "=1.29" } # 1.30.x requires socket2 v0.5.3 which requires rust 1.63
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
