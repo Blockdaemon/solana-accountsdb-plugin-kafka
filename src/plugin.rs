@@ -133,7 +133,7 @@ impl GeyserPlugin for KafkaPlugin {
 
         publisher
             .update_slot_status(event)
-            .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })
+            .map_err(|e| PluginError::SlotStatusUpdateError { msg: e.to_string() })
     }
 
     fn notify_transaction(
