@@ -22,6 +22,9 @@ rdkafka = { version = "0.31.0", features = ["ssl", "sasl"] }
 serde_json = { version = "~1" }
 serde = { version = "~1", features = ["derive"] }
 simple-error = "*"
+flate2 = { version = "=1.0.26" } # v1.0.27 broken due to https://github.com/rust-lang/rust/issues/86985
+h2 = { version = "=0.3.20" } # v0.3.21 requires rust 1.63.0
+reqwest = { version = "=0.11.18" } # 0.11.19 requires h2 v0.3.21 which requires rust 1.63.0
 toml_datetime = { version = "=0.6.1" } # 0.6.2 requires rust 1.64.0
 toml_edit = { version = "=0.19.8" } # 0.19.9 requires rust 1.64.0
 winnow = { version = "=0.4.1" } # 0.4.2 requires rust 1.64.0
@@ -29,6 +32,7 @@ winnow = { version = "=0.4.1" } # 0.4.2 requires rust 1.64.0
 [build-dependencies]
 prost-build = "0.11"
 cc = { version = "=1.0.81" } # 1.0.82 broken due to https://github.com/rust-lang/rust/issues/90829
+petgraph = { version = "=0.6.3" } # 0.6.4 requires indexmap 2.0.0 which requires hashbrown 0.14.0 and hence rust 1.64.0
 tempfile = { version = "=3.6.0" } # 3.7.0 requires rustix 0.38.0 which requires linux-raw-sys 0.4.0 and hence rust 1.63.0
 tokio = { version = "=1.29" } # 1.30.x requires socket2 v0.5.3 which requires rust 1.63
 
