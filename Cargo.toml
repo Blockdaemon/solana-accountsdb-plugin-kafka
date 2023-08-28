@@ -21,7 +21,7 @@ lazy_static = "1.4.0"
 log = "*"
 prometheus = "0.13.3"
 prost = "*"
-rdkafka = { version = "0.33.2", features = ["ssl", "sasl"] }
+rdkafka = { version = "0.34.0", features = ["ssl", "sasl"] }
 serde = { version = "~1", features = ["derive"] }
 serde_json = { version = "~1" }
 tokio = { version = "1.32", features = ["rt-multi-thread", "time", "macros", "sync"] }
