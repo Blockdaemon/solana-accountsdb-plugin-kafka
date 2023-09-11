@@ -20,22 +20,21 @@ jobs:
           rust_stable=$(rustc --version | awk '{print $2}')
           echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
 
-      - if: runner.os == 'Linux'
+      - name: Install build requirements
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             gnupg \
-            ntp \
             libudev-dev \
             libsasl2-dev \
             libssl-dev \
             libzstd-dev
-          sudo touch /etc/apt/sources.list.d/debian.list
-          echo 'deb http://ftp.debian.org/debian sid main' | sudo tee -a /etc/apt/sources.list.d/debian.list
+          echo 'deb http://ftp.debian.org/debian stable main' | sudo tee -a /etc/apt/sources.list.d/debian.list
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
           sudo apt-get update
-          sudo apt-get install -y protobuf-compiler
+          sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
 
       - uses: actions-rs/toolchain@v1
         with:
