@@ -31,7 +31,7 @@ anyhow = "1.0.75"
 cargo-lock = "9.0.0"
 git-version = "0.3.5"
 prost-build = "*"
-vergen = { version = "8.2.1", features = ["build", "rustc"] }
+vergen = { version = "8.2.5", features = ["build", "rustc"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
