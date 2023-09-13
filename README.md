@@ -6,13 +6,30 @@ Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com
 
 ### Binary releases
 
-Find binary releases at: https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka/releases
+Find binary releases [here](https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka/releases).
 
 ### Building from source
 
 #### Prerequisites
 
-You will need version 3.12 or later of the protobuf compiler `protoc` installed.
+You will need version 3.15 or later of the protobuf compiler `protoc` installed, since it is required for the `--experimental_allow_proto3_optional` option.
+
+Note that as of this writing, both ubuntu 20.04 and 22.04 have obsolete versions of `protoc`.
+
+For ubuntu, CI imports one from debian:
+
+```shell
+echo 'deb http://ftp.debian.org/debian stable main' | sudo tee -a /etc/apt/sources.list.d/debian.list
+sudo apt-get update
+sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
+```
+
+You may need the appropriate debian keys:
+
+```shell
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
+```
 
 #### Build
 
@@ -72,6 +89,7 @@ Config is specified via the plugin's JSON config file.
 ### Message Keys
 
 The message types are keyed as follows:
+
 - **Account update:** account address (public key)
 - **Slot status:** slot number
 - **Transaction notification:** transaction signature
@@ -103,5 +121,6 @@ This can happen when Kafka brokers are too slow or the connection to Kafka fails
 Therefor it is crucial to choose a sufficiently large buffer.
 
 The buffer size can be controlled using `librdkafka` config options, including:
+
 - `queue.buffering.max.messages`: Maximum number of messages allowed on the producer queue.
 - `queue.buffering.max.kbytes`: Maximum total message size sum allowed on the producer queue.
