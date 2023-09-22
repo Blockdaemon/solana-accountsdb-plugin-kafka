@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.1.5+solana.1.14.24"
+version = "0.1.5+solana.1.14.28"
 edition = "2021"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-solana-geyser-plugin-interface = { version = "=1.14.24" }
+solana-geyser-plugin-interface = { version = "=1.14.28" }
 solana-logger = { version = "=1.14" }
 solana-program = { version = "=1.14" }
 solana-transaction-status = { version = "=1.14" }
@@ -24,7 +24,8 @@ serde = { version = "~1", features = ["derive"] }
 simple-error = "*"
 flate2 = { version = "=1.0.26" } # v1.0.27 broken due to https://github.com/rust-lang/rust/issues/86985
 h2 = { version = "=0.3.20" } # v0.3.21 requires rust 1.63.0
-reqwest = { version = "=0.11.18" } # 0.11.19 requires h2 v0.3.21 which requires rust 1.63.0
+memchr = { version = "=2.5" } # v2.6 requires rust 1.63.0
+rayon-core = { version = "=1.11" } # rayon-core v1.12.0 which requires rust 1.63
 toml_datetime = { version = "=0.6.1" } # 0.6.2 requires rust 1.64.0
 toml_edit = { version = "=0.19.8" } # 0.19.9 requires rust 1.64.0
 winnow = { version = "=0.4.1" } # 0.4.2 requires rust 1.64.0
@@ -35,6 +36,7 @@ cc = { version = "=1.0.81" } # 1.0.82 broken due to https://github.com/rust-lang
 petgraph = { version = "=0.6.3" } # 0.6.4 requires indexmap 2.0.0 which requires hashbrown 0.14.0 and hence rust 1.64.0
 tempfile = { version = "=3.6.0" } # 3.7.0 requires rustix 0.38.0 which requires linux-raw-sys 0.4.0 and hence rust 1.63.0
 tokio = { version = "=1.29" } # 1.30.x requires socket2 v0.5.3 which requires rust 1.63
+which = { version = "=4.4.0" } # 4.4.1 requires rustix v0.38.14 which requires rust 1.63
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
