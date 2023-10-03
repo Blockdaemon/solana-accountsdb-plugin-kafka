@@ -98,7 +98,7 @@ impl Config {
         for (k, v) in self.kafka.iter() {
             config.set(k, v);
         }
-        ThreadedProducer::from_config_and_context(&config, StatsThreadedProducerContext::default())
+        ThreadedProducer::from_config_and_context(&config, StatsThreadedProducerContext)
     }
 
     fn set_default(&mut self, k: &'static str, v: &'static str) {
