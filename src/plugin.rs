@@ -35,8 +35,7 @@ use {
 #[derive(Default)]
 pub struct KafkaPlugin {
     publisher: Option<Publisher>,
-    filter: Option<Filter>,
-    publish_all_accounts: bool,
+    filter: Option<Vec<Filter>>,
     prometheus: Option<PrometheusService>,
 }
 
@@ -63,7 +62,6 @@ impl GeyserPlugin for KafkaPlugin {
             config_file
         );
         let config = Config::read_from(config_file)?;
-        self.publish_all_accounts = config.publish_all_accounts;
 
         let (version_n, version_s) = get_rdkafka_version();
         info!("rd_kafka_version: {:#08x}, {}", version_n, version_s);
@@ -79,7 +77,7 @@ impl GeyserPlugin for KafkaPlugin {
             .create_prometheus()
             .map_err(|error| PluginError::Custom(Box::new(error)))?;
         self.publisher = Some(publisher);
-        self.filter = Some(Filter::new(&config));
+        self.filter = Some(config.filters.iter().map(Filter::new).collect());
         self.prometheus = prometheus;
         info!("Spawned producer");
 
@@ -100,33 +98,39 @@ impl GeyserPlugin for KafkaPlugin {
         slot: u64,
         is_startup: bool,
     ) -> PluginResult<()> {
-        if is_startup && !self.publish_all_accounts {
+        let filters = self.unwrap_filters();
+        if is_startup && filters.iter().all(|filter| !filter.publish_all_accounts) {
             return Ok(());
         }
 
         let info = Self::unwrap_update_account(account);
-        let filter = self.unwrap_filter();
-        if !filter.wants_program(info.owner) && !filter.wants_account(info.pubkey) {
-            Self::log_ignore_account_update(info);
-            return Ok(());
+        let publisher = self.unwrap_publisher();
+        for filter in filters {
+            if !filter.update_account_topic.is_empty() {
+                if !filter.wants_program(info.owner) && !filter.wants_account(info.pubkey) {
+                    Self::log_ignore_account_update(info);
+                    continue;
+                }
+
+                let event = UpdateAccountEvent {
+                    slot,
+                    pubkey: info.pubkey.to_vec(),
+                    lamports: info.lamports,
+                    owner: info.owner.to_vec(),
+                    executable: info.executable,
+                    rent_epoch: info.rent_epoch,
+                    data: info.data.to_vec(),
+                    write_version: info.write_version,
+                    txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
+                };
+
+                publisher
+                    .update_account(event, filter.wrap_messages, &filter.update_account_topic)
+                    .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })?;
+            }
         }
 
-        let event = UpdateAccountEvent {
-            slot,
-            pubkey: info.pubkey.to_vec(),
-            lamports: info.lamports,
-            owner: info.owner.to_vec(),
-            executable: info.executable,
-            rent_epoch: info.rent_epoch,
-            data: info.data.to_vec(),
-            write_version: info.write_version,
-            txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
-        };
-
-        let publisher = self.unwrap_publisher();
-        publisher
-            .update_account(event)
-            .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })
+        Ok(())
     }
 
     fn update_slot_status(
@@ -136,19 +140,21 @@ impl GeyserPlugin for KafkaPlugin {
         status: PluginSlotStatus,
     ) -> PluginResult<()> {
         let publisher = self.unwrap_publisher();
-        if !publisher.wants_slot_status() {
-            return Ok(());
+        for filter in self.unwrap_filters() {
+            if !filter.slot_status_topic.is_empty() {
+                let event = SlotStatusEvent {
+                    slot,
+                    parent: parent.unwrap_or(0),
+                    status: SlotStatus::from(status).into(),
+                };
+
+                publisher
+                    .update_slot_status(event, filter.wrap_messages, &filter.slot_status_topic)
+                    .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })?;
+            }
         }
 
-        let event = SlotStatusEvent {
-            slot,
-            parent: parent.unwrap_or(0),
-            status: SlotStatus::from(status).into(),
-        };
-
-        publisher
-            .update_slot_status(event)
-            .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })
+        Ok(())
     }
 
     fn notify_transaction(
@@ -156,49 +162,54 @@ impl GeyserPlugin for KafkaPlugin {
         transaction: ReplicaTransactionInfoVersions,
         slot: u64,
     ) -> PluginResult<()> {
-        let publisher = self.unwrap_publisher();
-        if !publisher.wants_transaction() {
-            return Ok(());
-        }
-
-        let filter = self.unwrap_filter();
         let info = Self::unwrap_transaction(transaction);
+        let publisher = self.unwrap_publisher();
+        for filter in self.unwrap_filters() {
+            if !filter.transaction_topic.is_empty() {
+                let is_failed = info.transaction_status_meta.status.is_err();
+                if (!filter.wants_vote_tx() && info.is_vote)
+                    || (!filter.wants_failed_tx() && is_failed)
+                {
+                    debug!("Ignoring vote/failed transaction");
+                    continue;
+                }
 
-        let is_failed = info.transaction_status_meta.status.is_err();
-        if (!filter.wants_vote_tx() && info.is_vote) || (!filter.wants_failed_tx() && is_failed) {
-            debug!("Ignoring vote/failed transaction");
-            return Ok(());
+                if !info
+                    .transaction
+                    .message()
+                    .account_keys()
+                    .iter()
+                    .any(|pubkey| {
+                        filter.wants_program(pubkey.as_ref())
+                            || filter.wants_account(pubkey.as_ref())
+                    })
+                {
+                    debug!("Ignoring transaction {:?}", info.signature);
+                    continue;
+                }
+
+                let event = Self::build_transaction_event(slot, info);
+                publisher
+                    .update_transaction(event, filter.wrap_messages, &filter.transaction_topic)
+                    .map_err(|e| PluginError::TransactionUpdateError { msg: e.to_string() })?;
+            }
         }
 
-        let maybe_ignored = info
-            .transaction
-            .message()
-            .account_keys()
-            .iter()
-            .find(|pubkey| {
-                !(filter.wants_program(pubkey.as_ref()) || filter.wants_account(pubkey.as_ref()))
-            });
-        if let Some(ignored) = maybe_ignored {
-            debug!(
-                "Ignoring transaction {:?} due to account key: {:?}",
-                info.signature, ignored
-            );
-            return Ok(());
-        }
-
-        let event = Self::build_transaction_event(slot, info);
-
-        publisher
-            .update_transaction(event)
-            .map_err(|e| PluginError::TransactionUpdateError { msg: e.to_string() })
+        Ok(())
     }
 
     fn account_data_notifications_enabled(&self) -> bool {
-        self.unwrap_publisher().wants_update_account()
+        let filters = self.unwrap_filters();
+        filters
+            .iter()
+            .any(|filter| !filter.update_account_topic.is_empty())
     }
 
     fn transaction_notifications_enabled(&self) -> bool {
-        self.unwrap_publisher().wants_transaction()
+        let filters = self.unwrap_filters();
+        filters
+            .iter()
+            .any(|filter| !filter.transaction_topic.is_empty())
     }
 }
 
@@ -211,7 +222,7 @@ impl KafkaPlugin {
         self.publisher.as_ref().expect("publisher is unavailable")
     }
 
-    fn unwrap_filter(&self) -> &Filter {
+    fn unwrap_filters(&self) -> &Vec<Filter> {
         self.filter.as_ref().expect("filter is unavailable")
     }
 

@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon", "Triton One"]
-version = "0.1.8+solana.1.16.15"
+version = "0.3.0+solana.1.16.15"
 edition = "2021"
 repository = "https://github.com/rpcpool/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"

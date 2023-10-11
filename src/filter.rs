@@ -13,22 +13,30 @@
 // limitations under the License.
 
 use {
-    crate::Config,
+    crate::ConfigFilter,
     solana_program::pubkey::Pubkey,
     std::{collections::HashSet, str::FromStr},
 };
 
 pub struct Filter {
-    program_ignores: HashSet<[u8; 32]>,
-    program_filters: HashSet<[u8; 32]>,
-    account_filters: HashSet<[u8; 32]>,
-    include_vote_transactions: bool,
-    include_failed_transactions: bool,
+    pub publish_all_accounts: bool,
+    pub program_ignores: HashSet<[u8; 32]>,
+    pub program_filters: HashSet<[u8; 32]>,
+    pub account_filters: HashSet<[u8; 32]>,
+    pub include_vote_transactions: bool,
+    pub include_failed_transactions: bool,
+
+    pub update_account_topic: String,
+    pub slot_status_topic: String,
+    pub transaction_topic: String,
+
+    pub wrap_messages: bool,
 }
 
 impl Filter {
-    pub fn new(config: &Config) -> Self {
+    pub fn new(config: &ConfigFilter) -> Self {
         Self {
+            publish_all_accounts: config.publish_all_accounts,
             program_ignores: config
                 .program_ignores
                 .iter()
@@ -46,6 +54,11 @@ impl Filter {
                 .collect(),
             include_vote_transactions: config.include_vote_transactions,
             include_failed_transactions: config.include_failed_transactions,
+
+            update_account_topic: config.update_account_topic.clone(),
+            slot_status_topic: config.slot_status_topic.clone(),
+            transaction_topic: config.transaction_topic.clone(),
+            wrap_messages: config.wrap_messages,
         }
     }
 
@@ -78,20 +91,20 @@ impl Filter {
 #[cfg(test)]
 mod tests {
     use {
-        crate::{Config, Filter},
+        crate::{ConfigFilter, Filter},
         solana_program::pubkey::Pubkey,
         std::str::FromStr,
     };
 
     #[test]
     fn test_filter() {
-        let config = Config {
+        let config = ConfigFilter {
             program_ignores: vec![
                 "Sysvar1111111111111111111111111111111111111".to_owned(),
                 "Vote111111111111111111111111111111111111111".to_owned(),
             ],
             program_filters: vec!["9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned()],
-            ..Config::default()
+            ..Default::default()
         };
 
         let filter = Filter::new(&config);
@@ -111,13 +124,13 @@ mod tests {
 
     #[test]
     fn test_owner_filter() {
-        let config = Config {
+        let config = ConfigFilter {
             program_ignores: vec![
                 "Sysvar1111111111111111111111111111111111111".to_owned(),
                 "Vote111111111111111111111111111111111111111".to_owned(),
             ],
             program_filters: vec!["9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned()],
-            ..Config::default()
+            ..Default::default()
         };
 
         let filter = Filter::new(&config);
@@ -143,10 +156,10 @@ mod tests {
 
     #[test]
     fn test_account_filter() {
-        let config = Config {
+        let config = ConfigFilter {
             program_filters: vec!["9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_owned()],
             account_filters: vec!["5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht".to_owned()],
-            ..Config::default()
+            ..Default::default()
         };
 
         let filter = Filter::new(&config);
