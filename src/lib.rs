@@ -23,7 +23,7 @@ mod publisher;
 mod version;
 
 pub use {
-    config::{Config, Producer},
+    config::{Config, ConfigFilter, Producer},
     event::*,
     filter::Filter,
     plugin::KafkaPlugin,
