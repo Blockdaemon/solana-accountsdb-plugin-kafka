@@ -46,15 +46,17 @@ Config is specified via the plugin's JSON config file.
     "statistics.interval.ms": "1000"
   },
   "shutdown_timeout_ms": 30000,
-  "update_account_topic": "solana.testnet.account_updates",
-  "slot_status_topic": "solana.testnet.slot_status",
-  "transaction_topic": "solana.testnet.transactions",
-  "publish_all_accounts": false,
-  "wrap_messages": false,
-  "program_ignores": [
-    "Sysvar1111111111111111111111111111111111111",
-    "Vote111111111111111111111111111111111111111"
-  ]
+  "filters": [{
+    "update_account_topic": "solana.testnet.account_updates",
+    "slot_status_topic": "solana.testnet.slot_status",
+    "transaction_topic": "solana.testnet.transactions",
+    "program_ignores": [
+      "Sysvar1111111111111111111111111111111111111",
+      "Vote111111111111111111111111111111111111111"
+    ],
+    "publish_all_accounts": false,
+    "wrap_messages": false
+  }]
 }
 ```
 
@@ -62,15 +64,19 @@ Config is specified via the plugin's JSON config file.
 
 - `libpath`: Path to Kafka plugin
 - `kafka`: [`librdkafka` config options](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
-  This plugin overrides the defaults as seen in the example config.
 - `shutdown_timeout_ms`: Time the plugin is given to flush out all messages to Kafka upon exit request.
-- `update_account_topic`: Topic name of account updates. Omit to disable.
-- `slot_status_topic`: Topic name of slot status update. Omit to disable.
-- `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
-- `wrap_messages`: Wrap all messages in a unified wrapper object. Omit to disable (see Message Wrapping below).
-- `program_ignores`: Account addresses to ignore (see Filtering below).
-- `program_filters`: Solana program IDs to include.
-- `account_filters`: Solana accounts to include.
+- `prometheus`: Optional port to provide metrics in Prometheus format.
+- `filters`: Vec of filters with next fields:
+  - `update_account_topic`: Topic name of account updates. Omit to disable.
+  - `slot_status_topic`: Topic name of slot status update. Omit to disable.
+  - `transaction_topic`: Topic name of transaction update. Omit to disable.
+  - `program_ignores`: Account addresses to ignore (see Filtering below).
+  - `program_filters`: Solana program IDs to include.
+  - `account_filters`: Solana accounts to include.
+  - `publish_all_accounts`: Publish all accounts on startup. Omit to disable.
+  - `include_vote_transactions`: Include Vote transactions.
+  - `include_failed_transactions`: Include failed transactions.
+  - `wrap_messages`: Wrap all messages in a unified wrapper object. Omit to disable (see Message Wrapping below).
 
 ### Message Keys
 
