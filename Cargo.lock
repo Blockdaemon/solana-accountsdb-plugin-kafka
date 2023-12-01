@@ -2711,8 +2711,8 @@ dependencies = [
 
 [[package]]
 name = "solana-account-decoder"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "Inflector",
  "base64 0.21.4",
@@ -2725,7 +2725,7 @@ dependencies = [
  "serde_json",
  "solana-address-lookup-table-program",
  "solana-config-program",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "spl-token",
  "spl-token-2022",
  "spl-token-metadata-interface",
@@ -2735,7 +2735,7 @@ dependencies = [
 
 [[package]]
 name = "solana-accountsdb-plugin-kafka"
-version = "0.3.0+solana.1.16.17"
+version = "0.3.0+solana.1.16.20"
 dependencies = [
  "anyhow",
  "cargo-lock",
@@ -2750,7 +2750,7 @@ dependencies = [
  "serde",
  "serde_json",
  "solana-geyser-plugin-interface",
- "solana-logger 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-logger 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "solana-program",
  "solana-transaction-status",
  "tokio",
@@ -2759,8 +2759,8 @@ dependencies = [
 
 [[package]]
 name = "solana-address-lookup-table-program"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "bincode",
  "bytemuck",
@@ -2769,32 +2769,32 @@ dependencies = [
  "num-traits",
  "rustc_version",
  "serde",
- "solana-frozen-abi 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-frozen-abi-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-frozen-abi 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-frozen-abi-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "solana-program",
  "solana-program-runtime",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-config-program"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "bincode",
  "chrono",
  "serde",
  "serde_derive",
  "solana-program-runtime",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
 ]
 
 [[package]]
 name = "solana-frozen-abi"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d266bf0311bb403d31206aa2904b8741f57c7f5e27580b6810ad5e22fc7c3282"
+checksum = "7e77bfd59ad4e64c0f06fbcbe16d58f3a40bdbcc050fb78fc7134a55a5c290b9"
 dependencies = [
  "ahash 0.8.3",
  "blake3",
@@ -2818,15 +2818,15 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "sha2 0.10.8",
- "solana-frozen-abi-macro 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-frozen-abi-macro 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-frozen-abi"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "ahash 0.8.3",
  "blake3",
@@ -2850,16 +2850,16 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "sha2 0.10.8",
- "solana-frozen-abi-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-frozen-abi-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "subtle",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-frozen-abi-macro"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dfe18c5155015dcb494c6de84a03b725fcf90ec2006a047769018b94c2cf0de"
+checksum = "992b866b9f0510fd3c290afe6a37109ae8d15b74fa24e3fb6d164be2971ee94f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2869,8 +2869,8 @@ dependencies = [
 
 [[package]]
 name = "solana-frozen-abi-macro"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2880,20 +2880,20 @@ dependencies = [
 
 [[package]]
 name = "solana-geyser-plugin-interface"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "log",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "solana-transaction-status",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-logger"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f76fe25c2d06dcf621befd1e8d5655143e8a059c7e20fcb71736bc80ed779d6"
+checksum = "0278658cd4fb5405932452bf20f7df496ce8b9e9cf66a7d1c621bbe3b01fe297"
 dependencies = [
  "env_logger",
  "lazy_static",
@@ -2902,8 +2902,8 @@ dependencies = [
 
 [[package]]
 name = "solana-logger"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "env_logger",
  "lazy_static",
@@ -2912,30 +2912,30 @@ dependencies = [
 
 [[package]]
 name = "solana-measure"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "log",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
 ]
 
 [[package]]
 name = "solana-metrics"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "crossbeam-channel",
  "gethostname",
  "lazy_static",
  "log",
  "reqwest",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
 ]
 
 [[package]]
 name = "solana-program"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -2977,9 +2977,9 @@ dependencies = [
  "serde_json",
  "sha2 0.10.8",
  "sha3 0.10.8",
- "solana-frozen-abi 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-frozen-abi-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-sdk-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-frozen-abi 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-frozen-abi-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-sdk-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "thiserror",
  "tiny-bip39",
  "wasm-bindgen",
@@ -2988,8 +2988,8 @@ dependencies = [
 
 [[package]]
 name = "solana-program-runtime"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "base64 0.21.4",
  "bincode",
@@ -3004,20 +3004,20 @@ dependencies = [
  "rand 0.7.3",
  "rustc_version",
  "serde",
- "solana-frozen-abi 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-frozen-abi-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-frozen-abi 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-frozen-abi-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "solana-measure",
  "solana-metrics",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "solana_rbpf",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-sdk"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4106cda3d10833ba957dbd25fb841b50aeca7480ccf8f54859294716f54bcd4b"
+checksum = "dbe17a1ce6082979e7beffb7cadd7051e29d873594622a11a7d0a4c2dd4b7934"
 dependencies = [
  "assert_matches",
  "base64 0.21.4",
@@ -3056,11 +3056,11 @@ dependencies = [
  "serde_with",
  "sha2 0.10.8",
  "sha3 0.10.8",
- "solana-frozen-abi 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
- "solana-frozen-abi-macro 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
- "solana-logger 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-frozen-abi 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-frozen-abi-macro 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-logger 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "solana-program",
- "solana-sdk-macro 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-sdk-macro 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror",
  "uriparse",
  "wasm-bindgen",
@@ -3068,8 +3068,8 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "assert_matches",
  "base64 0.21.4",
@@ -3108,11 +3108,11 @@ dependencies = [
  "serde_with",
  "sha2 0.10.8",
  "sha3 0.10.8",
- "solana-frozen-abi 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-frozen-abi-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
- "solana-logger 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-frozen-abi 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-frozen-abi-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
+ "solana-logger 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "solana-program",
- "solana-sdk-macro 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk-macro 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "thiserror",
  "uriparse",
  "wasm-bindgen",
@@ -3120,9 +3120,9 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk-macro"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e560806a3859717eb2220b26e2cd68bb757b63affa3e79c3f1d8d853b5ee78f"
+checksum = "9fe4363d2503a75325ec94aa18b063574edb3454d38840e01c5af477b3b0689d"
 dependencies = [
  "bs58",
  "proc-macro2",
@@ -3133,8 +3133,8 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk-macro"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "bs58",
  "proc-macro2",
@@ -3145,8 +3145,8 @@ dependencies = [
 
 [[package]]
 name = "solana-transaction-status"
-version = "1.16.17"
-source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3#cdcfdb86e42956cf955a5ca6c5ef188821c70781"
+version = "1.16.20"
+source = "git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3#d31f34b08ed480bb13bd11b2b622e59c852c9790"
 dependencies = [
  "Inflector",
  "base64 0.21.4",
@@ -3160,7 +3160,7 @@ dependencies = [
  "serde_json",
  "solana-account-decoder",
  "solana-address-lookup-table-program",
- "solana-sdk 1.16.17 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.17-geyser-block-v3)",
+ "solana-sdk 1.16.20 (git+https://github.com/rpcpool/solana-public.git?tag=v1.16.20-geyser-block-v3)",
  "spl-associated-token-account",
  "spl-memo",
  "spl-token",
@@ -3170,9 +3170,9 @@ dependencies = [
 
 [[package]]
 name = "solana-zk-token-sdk"
-version = "1.16.17"
+version = "1.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "278c08e13bc04b6940997602909052524a375154b00cf0bfa934359a3bb7e6f0"
+checksum = "e0c83eec033c30c95938905374292fb8a3559dd3dfb36d715624e5f8f41b078e"
 dependencies = [
  "aes-gcm-siv",
  "base64 0.21.4",
@@ -3191,7 +3191,7 @@ dependencies = [
  "serde_json",
  "sha3 0.9.1",
  "solana-program",
- "solana-sdk 1.16.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-sdk 1.16.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle",
  "thiserror",
  "zeroize",
