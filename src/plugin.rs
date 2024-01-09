@@ -29,7 +29,10 @@ use {
         Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
     solana_program::pubkey::Pubkey,
-    std::fmt::{Debug, Formatter},
+    std::{
+        concat, env,
+        fmt::{Debug, Formatter},
+    },
 };
 
 #[derive(Default)]
@@ -47,7 +50,7 @@ impl Debug for KafkaPlugin {
 
 impl GeyserPlugin for KafkaPlugin {
     fn name(&self) -> &'static str {
-        "KafkaPlugin"
+        concat!(env!("CARGO_PKG_NAME"), "-", env!("CARGO_PKG_VERSION"))
     }
 
     fn on_load(&mut self, config_file: &str) -> PluginResult<()> {
