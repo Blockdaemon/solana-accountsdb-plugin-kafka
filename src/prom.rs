@@ -12,8 +12,16 @@ use {
         producer::{DeliveryResult, ProducerContext},
         statistics::Statistics,
     },
-    std::{io::Result as IoResult, net::SocketAddr, sync::Once, time::Duration},
-    tokio::runtime::Runtime,
+    std::{
+        io::Result as IoResult,
+        net::SocketAddr,
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Once,
+        },
+        time::Duration,
+    },
+    tokio::runtime::{Builder, Runtime},
 };
 
 lazy_static::lazy_static! {
@@ -78,7 +86,14 @@ impl PrometheusService {
             }
         });
 
-        let runtime = Runtime::new()?;
+        let runtime = Builder::new_multi_thread()
+            .thread_name_fn(|| {
+                static ATOMIC_ID: AtomicUsize = AtomicUsize::new(0);
+                let id = ATOMIC_ID.fetch_add(1, Ordering::Relaxed);
+                format!("solGeyserSqs{id:02}")
+            })
+            .enable_all()
+            .build()?;
         runtime.spawn(async move {
             let make_service = make_service_fn(move |_: &AddrStream| async move {
                 Ok::<_, hyper::Error>(service_fn(move |req: Request<Body>| async move {
