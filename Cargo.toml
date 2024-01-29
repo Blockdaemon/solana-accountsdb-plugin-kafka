@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.1.7+solana.1.16.23"
+version = "0.1.7+solana.1.16.27"
 edition = "2021"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -31,6 +31,8 @@ anyhow = "1.0.75"
 cargo-lock = "9.0.0"
 git-version = "0.3.5"
 prost-build = "*"
+
+home = { version = "=0.5.5" }
 vergen = { version = "8.2.5", features = ["build", "rustc"] }
 
 [package.metadata.docs.rs]
