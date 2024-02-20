@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.1.7+solana.1.17.22"
+version = "0.1.7+solana.1.18.22"
 edition = "2021"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -11,28 +11,27 @@ license = "Apache-2.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-solana-geyser-plugin-interface = { version = "~1.17" }
-solana-logger = { version = "~1.17" }
-solana-program = "~1.17"
-solana-transaction-status = { version = "~1.17" }
+solana-geyser-plugin-interface = { version = "~1.18" }
+solana-logger = { version = "~1.18" }
+solana-program = "~1.18"
+solana-transaction-status = { version = "~1.18" }
 
-bumpalo = { version = "~3.14"}
 hyper = { version = "~0", features = ["server"] }
-lazy_static = "~1"
+lazy_static = "*"
 log = "*"
 prometheus = "*"
 prost = "*"
 rdkafka = { version = "*", features = ["ssl", "sasl"] }
-serde = { version = "~1", features = ["derive"] }
-serde_json = { version = "~1" }
-tokio = { version = "~1", features = ["rt-multi-thread", "time", "macros", "sync"] }
+serde = { version = "*", features = ["derive"] }
+serde_json = { version = "*" }
+tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync"] }
 
 [build-dependencies]
-anyhow = "~1"
-cargo-lock = "~9"
+anyhow = "*"
+cargo-lock = "*"
 git-version = "*"
 prost-build = "*"
-vergen = { version = "~8", features = ["build", "rustc"] }
+vergen = { version = "*", features = ["build", "rustc"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

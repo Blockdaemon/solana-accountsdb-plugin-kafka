@@ -50,7 +50,7 @@ impl GeyserPlugin for KafkaPlugin {
         "KafkaPlugin"
     }
 
-    fn on_load(&mut self, config_file: &str) -> PluginResult<()> {
+    fn on_load(&mut self, config_file: &str, _: bool) -> PluginResult<()> {
         if self.publisher.is_some() {
             return Err(PluginError::Custom("plugin already loaded".into()));
         }
