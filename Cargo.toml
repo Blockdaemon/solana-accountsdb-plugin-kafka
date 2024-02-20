@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.1.7+solana.1.17.8"
+version = "0.1.7+solana.1.17.22"
 edition = "2021"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -16,6 +16,7 @@ solana-logger = { version = "~1.17" }
 solana-program = "~1.17"
 solana-transaction-status = { version = "~1.17" }
 
+bumpalo = { version = "~3.14"}
 hyper = { version = "~0", features = ["server"] }
 lazy_static = "~1"
 log = "*"
