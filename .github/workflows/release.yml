@@ -1,5 +1,18 @@
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
   push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -11,7 +24,7 @@ jobs:
         os: [ubuntu-20.04, ubuntu-22.04]
     runs-on: ["${{ matrix.os }}"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set env vars
         run: |
@@ -48,12 +61,22 @@ jobs:
             libzstd-dev \
             protobuf-compiler
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_STABLE }}
-          override: true
-          profile: minimal
-          components: rustfmt
+          components: clippy
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ./target
+          key: cargo-${{ matrix.os }}-${{ hashFiles('rust-toolchain.toml') }}-${{ hashFiles('**/Cargo.lock') }}-0000
+          restore-keys: |
+            cargo-${{ matrix.os }}-${{ hashFiles('rust-toolchain.toml') }}
 
       - name: Check Solana version
         run: |
@@ -74,7 +97,7 @@ jobs:
           mv solana-accountsdb-plugin-kafka-release-x86_64-unknown-linux-gnu.yml solana-accountsdb-plugin-kafka-release22-x86_64-unknown-linux-gnu.yml
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body: |

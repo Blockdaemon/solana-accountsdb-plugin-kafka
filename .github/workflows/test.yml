@@ -1,8 +1,20 @@
 # Source:
 # https://github.com/solana-labs/solana-accountsdb-plugin-postgres/blob/master/.github/workflows/test.yml
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
+  pull_request:
   push:
+    branches:
+      - 'master'
+      - 'v1.17-triton'
+      - 'v1.16-triton'
+      - 'v1.14-triton'
+      - 'v1.10-triton'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,7 +26,7 @@ jobs:
         os: [ubuntu-20.04, ubuntu-22.04]
     runs-on: ["${{ matrix.os }}"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set env vars
         run: |
@@ -51,31 +63,28 @@ jobs:
             libzstd-dev \
             protobuf-compiler
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ env.RUST_STABLE }}
-          override: true
-          profile: minimal
-          components: rustfmt, clippy
+          components: clippy
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ matrix.os }}-cargo-build-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}-${{ env.RUST_STABLE }}
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ./target
+          key: cargo-${{ matrix.os }}-${{ hashFiles('rust-toolchain.toml') }}-${{ hashFiles('**/Cargo.lock') }}-0000
+          restore-keys: |
+            cargo-${{ matrix.os }}-${{ hashFiles('rust-toolchain.toml') }}
 
-      - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - name: Run fmt
+        run: cargo fmt --all -- --check
 
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --workspace --all-targets -- --deny=warnings
+      - name: Run clippy
+        run: cargo clippy --all-targets --tests -- -Dwarnings
 
       - name: Build
         run: ./ci/cargo-build-test.sh
