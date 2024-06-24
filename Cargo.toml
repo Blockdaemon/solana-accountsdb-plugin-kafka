@@ -13,7 +13,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 solana-geyser-plugin-interface = { version = "~1.18" }
 solana-logger = { version = "~1.18" }
-solana-program = "~1.18"
+solana-program = "~2.0"
 solana-transaction-status = { version = "~1.18" }
 
 hyper = { version = "~0", features = ["server"] }
