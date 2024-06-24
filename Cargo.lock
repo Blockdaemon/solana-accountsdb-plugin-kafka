@@ -2778,7 +2778,7 @@ dependencies = [
  "serde",
  "serde_json",
  "solana-geyser-plugin-interface",
- "solana-logger",
+ "solana-logger 2.0.0",
  "solana-program",
  "solana-transaction-status",
  "tokio",
@@ -2853,6 +2853,17 @@ name = "solana-logger"
 version = "1.18.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a0511082fc62f2d086520fff5aa1917c389d8c840930c08ad255ae05952c08a2"
+dependencies = [
+ "env_logger",
+ "lazy_static",
+ "log",
+]
+
+[[package]]
+name = "solana-logger"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a35060affcb1165707842f034d7eaa21ba84bde56250fcc9c93f993cee75fa2"
 dependencies = [
  "env_logger",
  "lazy_static",
@@ -3014,7 +3025,7 @@ dependencies = [
  "siphasher",
  "solana-frozen-abi",
  "solana-frozen-abi-macro",
- "solana-logger",
+ "solana-logger 1.18.17",
  "solana-program",
  "solana-sdk-macro",
  "thiserror",
