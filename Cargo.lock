@@ -2778,7 +2778,7 @@ dependencies = [
  "serde",
  "serde_json",
  "solana-geyser-plugin-interface",
- "solana-logger 2.0.1",
+ "solana-logger 2.0.2",
  "solana-program",
  "solana-transaction-status",
  "tokio",
@@ -2861,9 +2861,9 @@ dependencies = [
 
 [[package]]
 name = "solana-logger"
-version = "2.0.1"
+version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e7910af7fc8b30676c4a3e2f604ffd1aa75a4305fc76b66a3b1779fa8d532b0"
+checksum = "024c7ae864a5217198bfcc1823914ee63f96f154f75d7f590ad3e02b3cb2e3a4"
 dependencies = [
  "env_logger",
  "lazy_static",
