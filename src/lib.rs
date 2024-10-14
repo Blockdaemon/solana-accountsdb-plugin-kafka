@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use solana_geyser_plugin_interface::geyser_plugin_interface::GeyserPlugin;
+use agave_geyser_plugin_interface::geyser_plugin_interface::GeyserPlugin;
 
 mod config;
 mod event;
 mod filter;
+mod metrics;
 mod plugin;
-mod prom;
 mod publisher;
 mod version;
 
@@ -26,8 +26,8 @@ pub use {
     config::{Config, ConfigFilter, Producer},
     event::*,
     filter::Filter,
+    metrics::PrometheusService,
     plugin::KafkaPlugin,
-    prom::PrometheusService,
     publisher::Publisher,
 };
 

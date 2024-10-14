@@ -21,13 +21,13 @@ use {
         TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
         V0LoadedMessage, V0Message,
     },
-    log::{debug, error, info, log_enabled},
-    rdkafka::util::get_rdkafka_version,
-    solana_geyser_plugin_interface::geyser_plugin_interface::{
+    agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
         ReplicaAccountInfoVersions, ReplicaTransactionInfoV2, ReplicaTransactionInfoVersions,
         Result as PluginResult, SlotStatus as PluginSlotStatus,
     },
+    log::{debug, error, info, log_enabled},
+    rdkafka::util::get_rdkafka_version,
     solana_program::pubkey::Pubkey,
     std::{
         concat, env,

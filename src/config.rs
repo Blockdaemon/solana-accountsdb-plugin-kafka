@@ -13,7 +13,10 @@
 // limitations under the License.
 
 use {
-    crate::{prom::StatsThreadedProducerContext, PrometheusService},
+    crate::{metrics::StatsThreadedProducerContext, PrometheusService},
+    agave_geyser_plugin_interface::geyser_plugin_interface::{
+        GeyserPluginError, Result as PluginResult,
+    },
     rdkafka::{
         config::FromClientConfigAndContext,
         error::KafkaResult,
@@ -21,9 +24,6 @@ use {
         ClientConfig,
     },
     serde::Deserialize,
-    solana_geyser_plugin_interface::geyser_plugin_interface::{
-        GeyserPluginError, Result as PluginResult,
-    },
     std::{collections::HashMap, fs::File, io::Result as IoResult, net::SocketAddr, path::Path},
 };
 

@@ -15,7 +15,7 @@
 use {
     crate::{
         message_wrapper::EventMessage::{self, Account, Slot, Transaction},
-        prom::{
+        metrics::{
             StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
             UPLOAD_TRANSACTIONS_TOTAL,
         },
