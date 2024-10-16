@@ -16,7 +16,7 @@ solana-logger = { version = "~2.0" }
 solana-program = "~1.18"
 solana-transaction-status = { version = "~1.18" }
 
-hyper = { version = "~0", features = ["server"] }
+hyper = { version = "~1", features = ["server"] }
 lazy_static = "*"
 log = "*"
 prometheus = "*"
