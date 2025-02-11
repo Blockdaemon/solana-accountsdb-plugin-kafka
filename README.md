@@ -127,7 +127,7 @@ This means incoming events from the Solana validator will get buffered and publi
 
 When the publishing buffer is exhausted any additional events will get dropped.
 This can happen when Kafka brokers are too slow or the connection to Kafka fails.
-Therefor it is crucial to choose a sufficiently large buffer.
+Therefore it is crucial to choose a sufficiently large buffer.
 
 The buffer size can be controlled using `librdkafka` config options, including:
 
