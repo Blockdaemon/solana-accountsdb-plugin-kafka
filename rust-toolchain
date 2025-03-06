@@ -1,4 +1,4 @@
 # see also upstream solana/rust-toolchain.toml
 # https://github.com/solana-labs/solana/blob/master/rust-toolchain.toml
 [toolchain]
-channel = "1.76.0"
+channel = "1.85.0"
