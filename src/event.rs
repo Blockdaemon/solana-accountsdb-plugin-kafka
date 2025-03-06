@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use solana_geyser_plugin_interface::geyser_plugin_interface::SlotStatus as PluginSlotStatus;
+use agave_geyser_plugin_interface::geyser_plugin_interface::SlotStatus as PluginSlotStatus;
 
 include!(concat!(
     env!("OUT_DIR"),
@@ -25,6 +25,10 @@ impl From<PluginSlotStatus> for SlotStatus {
             PluginSlotStatus::Processed => SlotStatus::Processed,
             PluginSlotStatus::Rooted => SlotStatus::Rooted,
             PluginSlotStatus::Confirmed => SlotStatus::Confirmed,
+            PluginSlotStatus::FirstShredReceived => SlotStatus::FirstShredReceived,
+            PluginSlotStatus::Completed => SlotStatus::Completed,
+            PluginSlotStatus::CreatedBank => SlotStatus::CreatedBank,
+            PluginSlotStatus::Dead(_) => SlotStatus::Dead,
         }
     }
 }

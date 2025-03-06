@@ -4,9 +4,13 @@ use vergen::{BuildBuilder, Emitter, RustcBuilder};
 fn main() -> anyhow::Result<()> {
     // Proto
     let mut config = prost_build::Config::new();
+    let proto_file = "proto/event.proto";
+
+    println!("cargo:rerun-if-changed={}", proto_file);
+
     config.boxed(".blockdaemon.solana.accountsdb_plugin_kafka.types.MessageWrapper");
     config.protoc_arg("--experimental_allow_proto3_optional");
-    config.compile_protos(&["proto/event.proto"], &["proto/"])?;
+    config.compile_protos(&[proto_file], &["proto/"])?;
 
     // Version metrics
     let _ = Emitter::default()
