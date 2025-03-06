@@ -1,4 +1,5 @@
 use cargo_lock::Lockfile;
+use vergen::{BuildBuilder, Emitter, RustcBuilder};
 
 fn main() -> anyhow::Result<()> {
     // Proto
@@ -8,9 +9,10 @@ fn main() -> anyhow::Result<()> {
     config.compile_protos(&["proto/event.proto"], &["proto/"])?;
 
     // Version metrics
-    let mut envs = vergen::EmitBuilder::builder();
-    envs.all_build().all_rustc();
-    envs.emit()?;
+    let _ = Emitter::default()
+        .add_instructions(&BuildBuilder::all_build()?)?
+        .add_instructions(&RustcBuilder::all_rustc()?)?
+        .emit();
 
     // vergen git version does not looks cool
     println!(
