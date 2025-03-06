@@ -19,12 +19,16 @@ include!(concat!(
     "/blockdaemon.solana.accountsdb_plugin_kafka.types.rs"
 ));
 
-impl From<PluginSlotStatus> for SlotStatus {
-    fn from(other: PluginSlotStatus) -> Self {
-        match other {
-            PluginSlotStatus::Processed => SlotStatus::Processed,
-            PluginSlotStatus::Rooted => SlotStatus::Rooted,
-            PluginSlotStatus::Confirmed => SlotStatus::Confirmed,
-        }
-    }
-}
+// impl From<PluginSlotStatus> for SlotStatus {
+//     fn from(other: PluginSlotStatus) -> Self {
+//         match other {
+//             PluginSlotStatus::Processed => SlotStatus::Processed,
+//             PluginSlotStatus::Rooted => SlotStatus::Rooted,
+//             PluginSlotStatus::Confirmed => SlotStatus::Confirmed,
+//             PluginSlotStatus::FirstShredReceived => todo!(),
+//             PluginSlotStatus::Completed => todo!(),
+//             PluginSlotStatus::CreatedBank => todo!(),
+//             PluginSlotStatus::Dead(_) => todo!(),
+//         }
+//     }
+// }

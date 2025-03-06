@@ -14,12 +14,7 @@
 
 use {
     crate::{
-        sanitized_message, CompiledInstruction, Config, Filter, InnerInstruction,
-        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
-        MessageAddressTableLookup, MessageHeader, PrometheusService, Publisher, Reward,
-        SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
-        TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
-        V0LoadedMessage, V0Message,
+        event, sanitized_message, CompiledInstruction, Config, Filter, InnerInstruction, InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses, MessageAddressTableLookup, MessageHeader, PrometheusService, Publisher, Reward, SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent, TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent, V0LoadedMessage, V0Message
     },
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
@@ -140,7 +135,7 @@ impl GeyserPlugin for KafkaPlugin {
         &self,
         slot: u64,
         parent: Option<u64>,
-        status: PluginSlotStatus,
+        status: &PluginSlotStatus,
     ) -> PluginResult<()> {
         let publisher = self.unwrap_publisher();
         for filter in self.unwrap_filters() {
@@ -148,7 +143,7 @@ impl GeyserPlugin for KafkaPlugin {
                 let event = SlotStatusEvent {
                     slot,
                     parent: parent.unwrap_or(0),
-                    status: SlotStatus::from(status).into(),
+                    status: SlotStatus::from(event::SlotStatus::try_from(status.clone())).into(),
                 };
 
                 publisher

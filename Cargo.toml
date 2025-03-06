@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon", "Triton One"]
-version = "0.4.0"
+version = "0.4.0+solana.2.1.14"
 edition = "2021"
 repository = "https://github.com/rpcpool/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-agave-geyser-plugin-interface = "~2.0.13"
+agave-geyser-plugin-interface = "=2.1.14"
 hyper = { version = "0.14.26", features = ["server"] }
 lazy_static = "1.4.0"
 log = "0.4.0"
@@ -21,9 +21,9 @@ prost = "0.12.1"
 rdkafka = { version = "0.33.0", features = ["ssl", "sasl"] }
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.81"
-solana-logger = "~2.0.13"
-solana-program = "~2.0.13"
-solana-transaction-status = "~2.0.13"
+solana-logger = "=2.1.14"
+solana-program = "=2.1.14"
+solana-transaction-status = "=2.1.14"
 tokio = { version = "1.32.0", features = ["rt-multi-thread", "time", "macros", "sync"] }
 
 [build-dependencies]
