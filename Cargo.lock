@@ -2902,7 +2902,7 @@ dependencies = [
 
 [[package]]
 name = "solana-accountsdb-plugin-kafka"
-version = "0.1.7+solana.2.1.15"
+version = "0.1.8+solana.2.1.16"
 dependencies = [
  "agave-geyser-plugin-interface",
  "anyhow",
