@@ -1,15 +1,9 @@
 use {
     crate::version::VERSION as VERSION_INFO,
-    hyper::{
-        body::Incoming,
-        service::service_fn,
-        Response,
-        Request,
-    },
-    http_body_util::Full,
     bytes::Bytes,
     http::StatusCode,
-    tokio::net::TcpListener,
+    http_body_util::Full,
+    hyper::{body::Incoming, service::service_fn, Request, Response},
     hyper_util::rt::TokioIo,
     log::*,
     prometheus::{GaugeVec, IntCounterVec, Opts, Registry, TextEncoder},
@@ -19,6 +13,7 @@ use {
         statistics::Statistics,
     },
     std::{io::Result as IoResult, net::SocketAddr, sync::Once, time::Duration},
+    tokio::net::TcpListener,
     tokio::runtime::Runtime,
 };
 
@@ -87,7 +82,7 @@ impl PrometheusService {
         let runtime = Runtime::new()?;
         runtime.spawn(async move {
             let listener = TcpListener::bind(address).await.unwrap();
-            
+
             loop {
                 let (stream, _) = match listener.accept().await {
                     Ok(conn) => conn,
@@ -96,7 +91,7 @@ impl PrometheusService {
                         continue;
                     }
                 };
-                
+
                 let io = TokioIo::new(stream);
 
                 let service = service_fn(|req: Request<Incoming>| async move {
@@ -132,7 +127,9 @@ fn metrics_handler() -> Response<Full<Bytes>> {
             error!("could not encode custom metrics: {}", error);
             String::new()
         });
-    Response::builder().body(Full::new(Bytes::from(metrics))).unwrap()
+    Response::builder()
+        .body(Full::new(Bytes::from(metrics)))
+        .unwrap()
 }
 
 fn not_found_handler() -> Response<Full<Bytes>> {
