@@ -1,10 +1,10 @@
 use {
     crate::version::VERSION as VERSION_INFO,
-    hyper::{
-        server::conn::AddrStream,
-        service::{make_service_fn, service_fn},
-        Body, Request, Response, Server, StatusCode,
-    },
+    bytes::Bytes,
+    http::StatusCode,
+    http_body_util::Full,
+    hyper::{body::Incoming, service::service_fn, Request, Response},
+    hyper_util::rt::TokioIo,
     log::*,
     prometheus::{GaugeVec, IntCounterVec, Opts, Registry, TextEncoder},
     rdkafka::{
@@ -13,6 +13,7 @@ use {
         statistics::Statistics,
     },
     std::{io::Result as IoResult, net::SocketAddr, sync::Once, time::Duration},
+    tokio::net::TcpListener,
     tokio::runtime::Runtime,
 };
 
@@ -80,17 +81,35 @@ impl PrometheusService {
 
         let runtime = Runtime::new()?;
         runtime.spawn(async move {
-            let make_service = make_service_fn(move |_: &AddrStream| async move {
-                Ok::<_, hyper::Error>(service_fn(move |req: Request<Body>| async move {
+            let listener = TcpListener::bind(address).await.unwrap();
+
+            loop {
+                let (stream, _) = match listener.accept().await {
+                    Ok(conn) => conn,
+                    Err(e) => {
+                        error!("Failed to accept connection: {}", e);
+                        continue;
+                    }
+                };
+
+                let io = TokioIo::new(stream);
+
+                let service = service_fn(|req: Request<Incoming>| async move {
                     let response = match req.uri().path() {
                         "/metrics" => metrics_handler(),
                         _ => not_found_handler(),
                     };
                     Ok::<_, hyper::Error>(response)
-                }))
-            });
-            if let Err(error) = Server::bind(&address).serve(make_service).await {
-                error!("prometheus service failed: {}", error);
+                });
+
+                tokio::task::spawn(async move {
+                    if let Err(err) = hyper::server::conn::http1::Builder::new()
+                        .serve_connection(io, service)
+                        .await
+                    {
+                        error!("Error serving connection: {}", err);
+                    }
+                });
             }
         });
         Ok(PrometheusService { runtime })
@@ -101,20 +120,22 @@ impl PrometheusService {
     }
 }
 
-fn metrics_handler() -> Response<Body> {
+fn metrics_handler() -> Response<Full<Bytes>> {
     let metrics = TextEncoder::new()
         .encode_to_string(&REGISTRY.gather())
         .unwrap_or_else(|error| {
             error!("could not encode custom metrics: {}", error);
             String::new()
         });
-    Response::builder().body(Body::from(metrics)).unwrap()
+    Response::builder()
+        .body(Full::new(Bytes::from(metrics)))
+        .unwrap()
 }
 
-fn not_found_handler() -> Response<Body> {
+fn not_found_handler() -> Response<Full<Bytes>> {
     Response::builder()
         .status(StatusCode::NOT_FOUND)
-        .body(Body::empty())
+        .body(Full::new(Bytes::from("")))
         .unwrap()
 }
 
