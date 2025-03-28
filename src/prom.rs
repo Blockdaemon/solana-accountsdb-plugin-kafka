@@ -75,7 +75,9 @@ impl PrometheusService {
                 ("rustc", VERSION_INFO.rustc),
                 ("buildts", VERSION_INFO.buildts),
             ] {
-                VERSION.with_label_values(&[key, value]).inc()
+                VERSION
+                    .with_label_values(&[key.to_string(), value.to_string()])
+                    .inc();
             }
         });
 
@@ -148,7 +150,7 @@ impl ClientContext for StatsThreadedProducerContext {
             macro_rules! set_value {
                 ($name:expr, $value:expr) => {
                     KAFKA_STATS
-                        .with_label_values(&[&name, $name])
+                        .with_label_values(&[&name.to_string(), &$name.to_string()])
                         .set($value as f64);
                 };
             }
