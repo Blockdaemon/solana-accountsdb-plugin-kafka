@@ -1,0 +1,4 @@
+# see also upstream solana/rust-toolchain.toml
+# https://github.com/anza-xyz/agave/blob/master/rust-toolchain.toml
+[toolchain]
+channel = "1.84.1"

@@ -50,7 +50,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ matrix.os }}-cargo-build-${{ hashFiles('**/Cargo.lock', 'rust-toolchain') }}-${{ env.RUST_STABLE }}
+          key: ${{ matrix.os }}-cargo-build-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}-${{ env.RUST_STABLE }}
 
       - name: cargo fmt
         uses: actions-rs/cargo@v1
