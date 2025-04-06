@@ -4,8 +4,11 @@ description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
 version = "0.1.8+solana.2.2.7"
 edition = "2021"
-repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
 license = "Apache-2.0"
+repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
+homepage = "https://blockdaemon.com"
+keywords = ["solana", "blockchain", "kafka", "plugin"]
+categories = ["cryptography::cryptocurrencies", "database", "network-programming"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
