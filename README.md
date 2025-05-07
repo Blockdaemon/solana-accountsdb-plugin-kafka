@@ -14,7 +14,7 @@ Find binary releases [here](https://github.com/Blockdaemon/solana-accountsdb-plu
 
 You will need version 3.15 or later of the protobuf compiler `protoc` installed, since it is required for the `--experimental_allow_proto3_optional` option.
 
-Note that as of this writing, both ubuntu 20.04 and 22.04 have obsolete versions of `protoc`.
+Note that as of this writing, ubuntu 22.04 still has an obsolete of `protoc`.
 
 For ubuntu, CI imports one from debian:
 
