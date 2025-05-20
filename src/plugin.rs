@@ -28,7 +28,7 @@ use {
     },
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
-    solana_program::pubkey::Pubkey,
+    solana_pubkey::Pubkey,
     std::fmt::{Debug, Formatter},
 };
 
@@ -251,7 +251,7 @@ impl KafkaPlugin {
     }
 
     fn build_compiled_instruction(
-        ix: &solana_program::instruction::CompiledInstruction,
+        ix: &solana_message::compiled_instruction::CompiledInstruction,
     ) -> CompiledInstruction {
         CompiledInstruction {
             program_id_index: ix.program_id_index as u32,
@@ -269,7 +269,7 @@ impl KafkaPlugin {
         }
     }
 
-    fn build_message_header(header: &solana_program::message::MessageHeader) -> MessageHeader {
+    fn build_message_header(header: &solana_message::MessageHeader) -> MessageHeader {
         MessageHeader {
             num_required_signatures: header.num_required_signatures as u32,
             num_readonly_signed_accounts: header.num_readonly_signed_accounts as u32,
@@ -379,7 +379,7 @@ impl KafkaPlugin {
                 is_simple_vote_transaction: transaction.is_simple_vote_transaction(),
                 message: Some(SanitizedMessage {
                     message_payload: Some(match transaction.message() {
-                        solana_program::message::SanitizedMessage::Legacy(lv) => {
+                        solana_message::SanitizedMessage::Legacy(lv) => {
                             sanitized_message::MessagePayload::Legacy(LegacyLoadedMessage {
                                 message: Some(LegacyMessage {
                                     header: Some(Self::build_message_header(&lv.message.header)),
@@ -403,7 +403,7 @@ impl KafkaPlugin {
                                     .collect(),
                             })
                         }
-                        solana_program::message::SanitizedMessage::V0(v0) => {
+                        solana_message::SanitizedMessage::V0(v0) => {
                             sanitized_message::MessagePayload::V0(V0LoadedMessage {
                                 message: Some(V0Message {
                                     header: Some(Self::build_message_header(&v0.message.header)),

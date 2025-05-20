@@ -15,9 +15,10 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 agave-geyser-plugin-interface = { version = "~2.2" }
-solana-program = { version = "~2.2" }
-solana-transaction-status = { version = "~2.2" }
 solana-logger = { version = "*" }
+solana-message = { version = "~2.2" }
+solana-pubkey = { version = "~2.2" }
+solana-transaction-status = { version = "~2.2" }
 
 hyper = { version = "*", features = ["http1", "server"] }
 hyper-util = { version = "*", features = ["tokio", "server"] }

@@ -14,7 +14,7 @@
 
 use {
     crate::ConfigFilter,
-    solana_program::pubkey::Pubkey,
+    solana_pubkey::Pubkey,
     std::{collections::HashSet, str::FromStr},
 };
 
@@ -93,7 +93,7 @@ impl Filter {
 mod tests {
     use {
         crate::{ConfigFilter, Filter},
-        solana_program::pubkey::Pubkey,
+        solana_pubkey::Pubkey,
         std::str::FromStr,
     };
 
