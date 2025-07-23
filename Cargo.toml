@@ -29,7 +29,7 @@ prost = "*"
 rdkafka = { version = "*", features = ["ssl", "sasl"] }
 serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
-tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync"] }
+tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync", "net"] }
 tower = { version = "*", features = ["make"] }
 bytes = "*"
 http-body-util = "*"
