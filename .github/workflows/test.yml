@@ -29,9 +29,9 @@ jobs:
             libsasl2-dev \
             libssl-dev \
             libzstd-dev
-          echo 'deb http://ftp.debian.org/debian stable main' | sudo tee -a /etc/apt/sources.list.d/debian.list
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
+          echo 'deb http://ftp.debian.org/debian bullseye main' | sudo tee -a /etc/apt/sources.list.d/debian.list
+          curl -fsSL https://ftp-master.debian.org/keys/archive-key-11.asc | sudo gpg --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://ftp.debian.org/debian bullseye main' | sudo tee /etc/apt/sources.list.d/debian.list
           sudo apt-get update
           sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
 
