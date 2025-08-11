@@ -14,22 +14,11 @@ Find binary releases [here](https://github.com/Blockdaemon/solana-accountsdb-plu
 
 You will need version 3.15 or later of the protobuf compiler `protoc` installed, since it is required for the `--experimental_allow_proto3_optional` option.
 
-Note that as of this writing, ubuntu 22.04 still has an obsolete of `protoc`.
+Note that as of this writing, Ubuntu 22.04 still has an obsolete of `protoc`.
 
-For ubuntu, CI imports one from debian:
+Previously, you could use `protocbuf-compiiler` from Debian trixie, but trixie's libc6 is no longer compatible with Ubuntu 22.04.
 
-```shell
-echo 'deb http://ftp.debian.org/debian stable main' | sudo tee -a /etc/apt/sources.list.d/debian.list
-sudo apt-get update
-sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
-```
-
-You may need the appropriate debian keys:
-
-```shell
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
-```
+You will need to use Ubuntu 24.04 or later, or Debian 12 or later.
 
 #### Build
 

@@ -11,7 +11,7 @@ env:
 
 jobs:
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
 
@@ -30,10 +30,6 @@ jobs:
             libsasl2-dev \
             libssl-dev \
             libzstd-dev
-          echo 'deb http://ftp.debian.org/debian bullseye main' | sudo tee -a /etc/apt/sources.list.d/debian.list
-          curl -fsSL https://ftp-master.debian.org/keys/archive-key-11.asc | sudo gpg --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://ftp.debian.org/debian bullseye main' | sudo tee /etc/apt/sources.list.d/debian.list
-          sudo apt-get update
           sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
 
       - uses: actions-rs/toolchain@v1
