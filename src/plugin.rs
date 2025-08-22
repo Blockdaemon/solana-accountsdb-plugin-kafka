@@ -28,7 +28,7 @@ use {
     },
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
-    solana_pubkey::Pubkey,
+    solana_pubkey::{pubkey, Pubkey},
     std::fmt::{Debug, Formatter},
 };
 
@@ -122,6 +122,9 @@ impl GeyserPlugin for KafkaPlugin {
                     data: info.data.to_vec(),
                     write_version: info.write_version,
                     txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
+                    data_version: info.write_version as u32, // Use write_version as data version
+                    is_startup,                              // Use the is_startup parameter
+                    account_age: slot.saturating_sub(info.rent_epoch), // Approximate age from rent epoch
                 };
 
                 publisher
@@ -147,6 +150,9 @@ impl GeyserPlugin for KafkaPlugin {
                     slot,
                     parent: parent.unwrap_or(0),
                     status: value.into(),
+                    is_confirmed: Self::is_slot_confirmed(&value), // Derived from status
+                    confirmation_count: Self::calculate_confirmation_count(&value), // Calculate from status
+                    status_description: Self::get_slot_status_description(&value), // Get human-readable status
                 };
 
                 publisher
@@ -215,6 +221,10 @@ impl GeyserPlugin for KafkaPlugin {
 }
 
 impl KafkaPlugin {
+    /// Compute Budget Program ID
+    const COMPUTE_BUDGET_PROGRAM_ID: Pubkey =
+        pubkey!("ComputeBudget111111111111111111111111111111");
+
     pub fn new() -> Self {
         Default::default()
     }
@@ -377,6 +387,14 @@ impl KafkaPlugin {
                         .collect(),
                     None => vec![],
                 },
+                compute_units_consumed: Self::extract_compute_units_from_metadata(
+                    transaction_status_meta,
+                ),
+                compute_units_price: Self::extract_compute_price_from_transaction(
+                    &transaction.message,
+                ),
+                error_logs: Self::extract_error_logs_from_status(&transaction_status_meta.status),
+                is_successful: transaction_status_meta.status.is_ok(), // Derived from status
             }),
             transaction: Some(SanitizedTransaction {
                 message_hash: message_hash.to_bytes().into(),
@@ -473,6 +491,16 @@ impl KafkaPlugin {
                                             })
                                         })
                                         .collect(),
+                                    writable_info: Self::build_loaded_address_info(
+                                        &v0.address_table_lookups,
+                                        &v0.account_keys,
+                                        true,
+                                    ),
+                                    readonly_info: Self::build_loaded_address_info(
+                                        &v0.address_table_lookups,
+                                        &v0.account_keys,
+                                        false,
+                                    ),
                                 }),
                                 is_writable_account_cache: {
                                     // Derive writable status from message header and account positions
@@ -503,6 +531,24 @@ impl KafkaPlugin {
                     .map(|x| x.as_ref().into())
                     .collect(),
             }),
+            compute_units_consumed: Self::extract_compute_units_from_metadata(
+                transaction_status_meta,
+            ),
+            compute_units_price: Self::extract_compute_price_from_transaction(&transaction.message),
+            total_cost: transaction_status_meta.fee
+                + Self::extract_compute_price_from_transaction(&transaction.message),
+            instruction_count: transaction.message.instructions().len() as u32,
+            account_count: Self::get_account_keys_from_message(&transaction.message)
+                .map(|keys| keys.len() as u32)
+                .unwrap_or(0),
+            execution_time_ns: 0, // Not available in current API
+            is_successful: transaction_status_meta.status.is_ok(),
+            execution_logs: transaction_status_meta
+                .log_messages
+                .clone()
+                .unwrap_or_default(),
+            error_details: Self::extract_error_logs_from_status(&transaction_status_meta.status),
+            confirmation_count: 0, // Will be populated from slot status when available
         }
     }
 
@@ -516,6 +562,133 @@ impl KafkaPlugin {
                 // Err should never happen because wants_account_key only returns false if the input is &[u8; 32]
                 Err(_err) => debug!("Ignoring update for account key: {:?}", info.owner),
             };
+        }
+    }
+
+    /// Extract compute units consumed from transaction metadata
+    fn extract_compute_units_from_metadata(
+        transaction_status_meta: &solana_transaction_status::TransactionStatusMeta,
+    ) -> u32 {
+        // Check if compute units are available in the metadata
+        if let Some(compute_units) = transaction_status_meta.compute_units_consumed {
+            compute_units as u32
+        } else {
+            // If not available in metadata, return 0
+            // We avoid log parsing as it's unreliable
+            0
+        }
+    }
+
+    /// Extract compute unit price from transaction message
+    fn extract_compute_price_from_transaction(message: &solana_message::VersionedMessage) -> u64 {
+        // Look for compute budget instructions in the transaction
+        let instructions = message.instructions();
+
+        for instruction in instructions {
+            // Check if this is a compute budget instruction
+            let program_id_index = instruction.program_id_index as usize;
+            if let Some(account_keys) = Self::get_account_keys_from_message(message) {
+                if program_id_index < account_keys.len() {
+                    let program_id = &account_keys[program_id_index];
+
+                    if *program_id == Self::COMPUTE_BUDGET_PROGRAM_ID {
+                        // Parse compute budget instruction data to extract price
+                        let data = &instruction.data;
+                        if data.len() >= 9 && data[0] == 3 {
+                            // SetComputeUnitPrice instruction (discriminator 3)
+                            let price = u64::from_le_bytes([
+                                data[1], data[2], data[3], data[4], data[5], data[6], data[7],
+                                data[8],
+                            ]);
+                            return price;
+                        }
+                    }
+                }
+            }
+        }
+        0 // Default price if not found
+    }
+
+    /// Extract account keys from versioned message
+    fn get_account_keys_from_message(
+        message: &solana_message::VersionedMessage,
+    ) -> Option<&[solana_pubkey::Pubkey]> {
+        match message {
+            solana_message::VersionedMessage::Legacy(lv) => Some(&lv.account_keys),
+            solana_message::VersionedMessage::V0(v0) => Some(&v0.account_keys),
+        }
+    }
+
+    /// Extract error information from transaction status (more reliable than log parsing)
+    fn extract_error_logs_from_status<T: std::fmt::Display>(status: &Result<(), T>) -> Vec<String> {
+        match status {
+            Ok(_) => vec![], // No errors
+            Err(error) => {
+                // Convert the actual error to a string representation
+                vec![error.to_string()]
+            }
+        }
+    }
+
+    /// Determine if slot is confirmed based on status
+    fn is_slot_confirmed(status: &SlotStatus) -> bool {
+        matches!(status, SlotStatus::Confirmed | SlotStatus::Rooted)
+    }
+
+    /// Get human-readable slot status description
+    fn get_slot_status_description(status: &SlotStatus) -> String {
+        match status {
+            SlotStatus::Processed => "Processed - highest slot of heaviest fork".to_string(),
+            SlotStatus::Rooted => {
+                "Rooted - highest slot having reached max vote lockout".to_string()
+            }
+            SlotStatus::Confirmed => "Confirmed - voted on by supermajority of cluster".to_string(),
+            SlotStatus::FirstShredReceived => "First shred received".to_string(),
+            SlotStatus::Completed => "Completed".to_string(),
+            SlotStatus::CreatedBank => "Created bank".to_string(),
+            SlotStatus::Dead => "Dead - fork has been abandoned".to_string(),
+        }
+    }
+
+    /// Build detailed loaded address information
+    fn build_loaded_address_info(
+        _address_table_lookups: &[solana_message::v0::MessageAddressTableLookup],
+        _account_keys: &[solana_pubkey::Pubkey],
+        is_writable: bool,
+    ) -> Vec<crate::LoadedAddressInfo> {
+        let mut address_info = Vec::new();
+
+        for lookup in _address_table_lookups.iter() {
+            let indexes = if is_writable {
+                &lookup.writable_indexes
+            } else {
+                &lookup.readonly_indexes
+            };
+
+            for &index in indexes.iter() {
+                // Create LoadedAddressInfo with available data
+                let info = crate::LoadedAddressInfo {
+                    address: lookup.account_key.as_ref().into(),
+                    index: index as u32,
+                    is_writable,
+                };
+                address_info.push(info);
+            }
+        }
+
+        address_info
+    }
+
+    /// Calculate confirmation count based on slot status
+    fn calculate_confirmation_count(status: &SlotStatus) -> u32 {
+        match status {
+            SlotStatus::Processed => 0,          // Not confirmed yet
+            SlotStatus::Rooted => 2,             // Fully confirmed (rooted)
+            SlotStatus::Confirmed => 1,          // Confirmed by supermajority
+            SlotStatus::FirstShredReceived => 0, // Early stage
+            SlotStatus::Completed => 1,          // Considered confirmed
+            SlotStatus::CreatedBank => 0,        // Early stage
+            SlotStatus::Dead => 0,               // Abandoned fork
         }
     }
 }

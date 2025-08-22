@@ -122,3 +122,89 @@ The buffer size can be controlled using `librdkafka` config options, including:
 
 - `queue.buffering.max.messages`: Maximum number of messages allowed on the producer queue.
 - `queue.buffering.max.kbytes`: Maximum total message size sum allowed on the producer queue.
+
+## Enhanced Analytics Support
+
+The plugin now provides significantly richer analytics data for blockchain monitoring and analysis, enhancing all supported Solana transaction formats.
+
+### Transaction Types
+
+The plugin supports multiple Solana transaction formats:
+
+- **Legacy Transactions**: Traditional Solana message format
+- **V0 Transactions**: Versioned transactions with address lookup tables (LUTs)
+
+All transaction types are enhanced with comprehensive analytics metadata.
+
+### Enhanced Analytics Features
+
+All transactions provide additional analytics data that can be used for:
+
+#### Performance Monitoring
+- **Compute Units**: Actual compute units consumed by transactions
+- **Pricing Information**: Compute unit pricing from ComputeBudget instructions
+- **Cost Analysis**: Transaction fees and compute costs
+
+#### Error Analysis & Debugging
+- **Error Detection**: Reliable error status from transaction metadata
+- **Success Tracking**: Transaction success/failure status
+- **Error Details**: Structured error information without log parsing
+
+#### Address Intelligence
+- **Address Lookup Tables**: Support for V0 LUT transactions
+- **Loaded Address Details**: Index and writable status for loaded addresses
+- **Account Metadata**: Enhanced account information and versioning
+
+#### Slot & Network Analytics
+- **Confirmation Status**: Smart confirmation counting based on slot status
+- **Status Descriptions**: Human-readable slot status descriptions
+- **Progress Tracking**: Slot progression monitoring
+
+### Message Schema Enhancements
+
+The protobuf schema has been enhanced with analytics fields:
+
+#### UpdateAccountEvent
+- `data_version`: Account data version for change tracking
+- `is_startup`: Whether this is a startup account update
+- `account_age`: Approximate account age in slots
+
+#### SlotStatusEvent
+- `is_confirmed`: Whether slot is confirmed by supermajority
+- `confirmation_count`: Confirmation level (0-2 based on status)
+- `status_description`: Human-readable status description
+
+#### TransactionEvent
+- `compute_units_consumed`: Actual compute units used
+- `compute_units_price`: Compute unit pricing in micro-lamports
+- `total_cost`: Total transaction cost (fee + compute)
+- `instruction_count`: Number of instructions in transaction
+- `account_count`: Number of accounts involved
+- `execution_time_ns`: Execution time in nanoseconds
+- `is_successful`: Transaction success status
+- `execution_logs`: Detailed execution logs
+- `error_details`: Detailed error information
+- `confirmation_count`: Number of confirmations
+
+#### LoadedAddresses
+- `writable_info`: Detailed writable address information
+- `readonly_info`: Detailed readonly address information
+
+### Configuration for Analytics Features
+
+Analytics features are enabled by default and require no additional configuration. The plugin automatically:
+
+- Detects transaction format (Legacy or V0)
+- Extracts available metadata fields
+- Provides enhanced analytics where data is available
+- Maintains backwards compatibility with existing consumers
+
+### Use Cases
+
+Analytics enhancements enable new use cases:
+
+- **Performance Monitoring**: Track compute unit usage and costs
+- **Error Analysis**: Monitor transaction failures and success rates
+- **Network Analytics**: Analyze slot confirmation patterns
+- **Address Intelligence**: Monitor address lookup table usage
+- **Cost Optimization**: Analyze transaction pricing and efficiency

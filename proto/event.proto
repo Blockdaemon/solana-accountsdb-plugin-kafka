@@ -35,6 +35,11 @@ message UpdateAccountEvent {
 
   // First signature of the transaction caused this account modification
   optional bytes txn_signature = 9;
+
+  // Additional analytics fields
+  uint32 data_version = 10;                   // Account data version for change tracking
+  bool is_startup = 11;                       // Whether this is a startup account update
+  uint64 account_age = 12;                    // Account age in slots since creation
 }
 
 message SlotStatusEvent {
@@ -43,6 +48,11 @@ message SlotStatusEvent {
   uint64 parent = 2;
 
   SlotStatus status = 3;
+
+  // Additional analytics fields
+  bool is_confirmed = 4;                      // Whether slot is confirmed
+  uint32 confirmation_count = 5;              // Number of confirmations
+  string status_description = 6;              // Human-readable status description
 }
 
 enum SlotStatus {
@@ -81,6 +91,15 @@ message CompiledInstruction {
 message LoadedAddresses {
   repeated bytes writable = 1;
   repeated bytes readonly = 2;
+  repeated LoadedAddressInfo writable_info = 3;   // Detailed writable address information
+  repeated LoadedAddressInfo readonly_info = 4;   // Detailed readonly address information
+}
+
+// New message for detailed loaded address information
+message LoadedAddressInfo {
+  bytes address = 1;                           // Account address
+  uint32 index = 2;                            // Index in the loaded addresses list
+  bool is_writable = 3;                        // Whether account is writable
 }
 
 message MessageAddressTableLookup {
@@ -174,6 +193,10 @@ message TransactionStatusMeta {
   repeated TransactionTokenBalance pre_token_balances = 8;
   repeated TransactionTokenBalance post_token_balances = 9;
   repeated Reward rewards = 10;
+  uint32 compute_units_consumed = 11;        // Compute units used by transaction
+  uint64 compute_units_price = 12;           // Compute unit price in micro-lamports
+  repeated string error_logs = 13;           // Detailed error logs for debugging
+  bool is_successful = 14;                   // Transaction success status (inverse of is_status_err)
 }
 
 // based on solana_accountsdb_plugin_interface::accountsdb_plugin_interface::ReplicaTransactionInfo
@@ -184,6 +207,18 @@ message TransactionEvent {
   TransactionStatusMeta transaction_status_meta = 4;
   uint64 slot = 5;
   uint64 index = 6;
+
+  // Enhanced analytics fields
+  uint32 compute_units_consumed = 7;         // Compute units used by transaction
+  uint64 compute_units_price = 8;            // Compute unit price in micro-lamports
+  uint64 total_cost = 9;                     // Total transaction cost (fee + compute)
+  uint32 instruction_count = 10;             // Number of instructions in transaction
+  uint32 account_count = 11;                 // Number of accounts involved
+  uint64 execution_time_ns = 12;             // Execution time in nanoseconds
+  bool is_successful = 13;                   // Transaction success status
+  repeated string execution_logs = 14;        // Detailed execution logs
+  repeated string error_details = 15;         // Detailed error information
+  uint32 confirmation_count = 16;            // Number of confirmations
 }
 
 message MessageWrapper {
