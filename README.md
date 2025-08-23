@@ -2,6 +2,27 @@
 
 Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com/developing/plugins/geyser-plugins).
 
+## Quick Start
+
+**Want to see data flowing immediately?** Use this minimal config:
+
+```json
+{
+  "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
+  "kafka": {
+    "bootstrap.servers": "localhost:9092"
+  },
+  "filters": [{
+    "update_account_topic": "solana.testnet.account_updates",
+    "slot_status_topic": "solana.testnet.slot_status",
+    "transaction_topic": "solana.testnet.transactions",
+    "publish_all_accounts": true
+  }]
+}
+```
+
+This will publish **all** account updates, transactions, and slot status to Kafka. Perfect for testing and development.
+
 ## Installation
 
 ### Binary releases
@@ -40,6 +61,10 @@ Config is specified via the plugin's JSON config file.
 
 ### Example Config
 
+**⚠️ WARNING: This example config will NOT publish most data by default!**
+
+The following config is a minimal example that demonstrates the structure, but with `publish_all_accounts: false` and no `program_filters`, you'll only see slot status updates. For testing, consider using the scenarios below.
+
 ```json
 {
   "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
@@ -66,10 +91,29 @@ Config is specified via the plugin's JSON config file.
 }
 ```
 
+**For Testing/Development (Recommended):**
+```json
+{
+  "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
+  "kafka": {
+    "bootstrap.servers": "localhost:9092"
+  },
+  "filters": [{
+    "update_account_topic": "solana.testnet.account_updates",
+    "slot_status_topic": "solana.testnet.slot_status",
+    "transaction_topic": "solana.testnet.transactions",
+    "publish_all_accounts": true
+  }]
+}
+```
+
 ### Reference
 
 - `libpath`: Path to Kafka plugin
-- `kafka`: [`librdkafka` config options](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
+- `kafka`: [`librdkafka` config options](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md). Common options include:
+  - `statistics.interval.ms`: Enables Prometheus metrics collection (set to 1000ms or higher)
+  - `queue.buffering.max.messages`: Controls producer buffer size
+  - `queue.buffering.max.kbytes`: Controls producer buffer size in KB
 - `shutdown_timeout_ms`: Time the plugin is given to flush out all messages to Kafka upon exit request.
 - `prometheus`: Optional port to provide metrics in Prometheus format.
 - `filters`: Vec of filters with next fields:
@@ -94,9 +138,57 @@ The message types are keyed as follows:
 
 ### Filtering
 
-If `program_ignores` are specified, then these addresses will be filtered out of the account updates
-and transaction notifications.  More specifically, account update messages for these accounts will not be emitted,
-and transaction notifications for any transaction involving these accounts will not be emitted.
+**⚠️ IMPORTANT: Understanding how filtering works is crucial for getting data flowing to Kafka!**
+
+The plugin uses a **whitelist approach** for filtering. By default, most events are filtered out unless you explicitly configure what you want to see.
+
+#### How Filtering Works
+
+1. **Account Updates**: Only published if the account's owner program is in `program_filters` OR the account address is in `account_filters`
+2. **Transactions**: Only published if they involve accounts from programs in `program_filters` OR specific accounts in `account_filters`
+3. **Slot Status**: Always published (not affected by filters)
+4. **Program Ignores**: Blacklist of programs/accounts to exclude (applied after whitelist filtering)
+
+#### Common Filtering Scenarios
+
+**Scenario 1: See Everything (Recommended for testing)**
+```json
+{
+  "publish_all_accounts": true,
+  "program_filters": [],
+  "account_filters": []
+}
+```
+
+**Scenario 2: See Specific Programs Only**
+```json
+{
+  "publish_all_accounts": false,
+  "program_filters": [
+    "11111111111111111111111111111111",  // System Program
+    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"  // Token Program
+  ]
+}
+```
+
+**Scenario 3: See Specific Accounts Only**
+```json
+{
+  "publish_all_accounts": false,
+  "account_filters": [
+    "YourAccountAddressHere111111111111111111111111"
+  ]
+}
+```
+
+#### Troubleshooting: No Data in Kafka?
+
+If you're not seeing messages in Kafka despite successful slot processing:
+
+1. **Check your filters**: Make sure you have either `publish_all_accounts: true` or specific `program_filters`/`account_filters`
+2. **Verify topics**: Ensure your topic names are correct and Kafka is running
+3. **Check program ignores**: Make sure you're not accidentally filtering out everything with overly restrictive `program_ignores`
+4. **Test with minimal config**: Start with `publish_all_accounts: true` to verify the plugin is working
 
 ### Message Wrapping
 
@@ -208,3 +300,61 @@ Analytics enhancements enable new use cases:
 - **Network Analytics**: Analyze slot confirmation patterns
 - **Address Intelligence**: Monitor address lookup table usage
 - **Cost Optimization**: Analyze transaction pricing and efficiency
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. No Data in Kafka Topics
+
+**Symptoms**: Solana validator shows slot processing but no messages appear in Kafka topics.
+
+**Causes & Solutions**:
+- **Filtering too restrictive**: Set `publish_all_accounts: true` or add specific `program_filters`
+- **Wrong topic names**: Verify your topic names match exactly
+- **Kafka connection issues**: Check if Kafka is running and accessible
+- **Plugin not loaded**: Verify the plugin path in `libpath` is correct
+
+**Quick Test**: Use the Quick Start config above to verify the plugin works.
+
+#### 2. Only Slot Status Messages Appear
+
+**Cause**: This is expected behavior with the default example config! Slot status is always published, but account updates and transactions require explicit filter configuration.
+
+**Solution**: Add `publish_all_accounts: true` or configure `program_filters`.
+
+#### 3. Plugin Fails to Load
+
+**Common Causes**:
+- **Version mismatch**: Ensure Solana and plugin are built with identical Rust/Solana versions
+- **Library path**: Check `libpath` points to the correct `.so` or `.dylib` file
+- **Permissions**: Ensure the plugin file is readable by the Solana process
+
+#### 4. High Memory Usage
+
+**Cause**: Large Kafka producer buffers can consume significant memory.
+
+**Solution**: Adjust buffer settings:
+```json
+{
+  "kafka": {
+    "queue.buffering.max.messages": "10000",
+    "queue.buffering.max.kbytes": "1048576"
+  }
+}
+```
+
+### Debugging Tips
+
+1. **Start Simple**: Begin with `publish_all_accounts: true` to verify basic functionality
+2. **Check Topics**: Use Kafdrop or `kafka-console-consumer` to verify topics exist
+3. **Monitor Metrics**: Enable Prometheus metrics to see message counts and errors
+4. **Verify Filters**: Double-check your filter configuration matches your expectations
+
+### Getting Help
+
+If you're still having issues:
+1. Check this troubleshooting section
+2. Review the filtering documentation above
+3. Try the Quick Start configuration
+4. Open an issue with your config and error details
