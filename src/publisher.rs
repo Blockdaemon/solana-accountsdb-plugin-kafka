@@ -50,7 +50,7 @@ impl Publisher {
     ) -> Result<(), KafkaError> {
         let temp_key;
         let (key, buf) = if wrap_messages {
-            temp_key = self.copy_and_prepend(ev.pubkey.as_slice(), 65u8);
+            temp_key = self.copy_and_prepend(ev.pubkey.as_slice(), b'A');
             (&temp_key, Self::encode_with_wrapper(Account(Box::new(ev))))
         } else {
             (&ev.pubkey, ev.encode_to_vec())
@@ -71,7 +71,7 @@ impl Publisher {
     ) -> Result<(), KafkaError> {
         let temp_key;
         let (key, buf) = if wrap_messages {
-            temp_key = self.copy_and_prepend(&ev.slot.to_le_bytes(), 83u8);
+            temp_key = self.copy_and_prepend(&ev.slot.to_le_bytes(), b'S');
             (&temp_key, Self::encode_with_wrapper(Slot(Box::new(ev))))
         } else {
             temp_key = ev.slot.to_le_bytes().to_vec();
@@ -93,7 +93,7 @@ impl Publisher {
     ) -> Result<(), KafkaError> {
         let temp_key;
         let (key, buf) = if wrap_messages {
-            temp_key = self.copy_and_prepend(ev.signature.as_slice(), 84u8);
+            temp_key = self.copy_and_prepend(ev.signature.as_slice(), b'T');
             (
                 &temp_key,
                 Self::encode_with_wrapper(Transaction(Box::new(ev))),
