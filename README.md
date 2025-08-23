@@ -2,6 +2,13 @@
 
 Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com/developing/plugins/geyser-plugins).
 
+## What This Plugin Does
+
+Streams **three types** of Solana data to Kafka:
+- **Account Updates**: Balance changes, data modifications, owner changes
+- **Transactions**: Complete transaction details, instructions, fees, success/failure
+- **Slot Status**: Network progress, confirmation status, health metrics
+
 ## Quick Start
 
 **Want to see data flowing immediately?** Use this minimal config:
