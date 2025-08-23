@@ -122,6 +122,9 @@ impl GeyserPlugin for KafkaPlugin {
                     data: info.data.to_vec(),
                     write_version: info.write_version,
                     txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
+                    data_version: info.write_version as u32, // Use write_version as data version
+                    is_startup,                              // Use the is_startup parameter
+                    account_age: slot.saturating_sub(info.rent_epoch), // Approximate age from rent epoch
                 };
 
                 publisher
@@ -147,6 +150,9 @@ impl GeyserPlugin for KafkaPlugin {
                     slot,
                     parent: parent.unwrap_or(0),
                     status: value.into(),
+                    is_confirmed: Self::is_slot_confirmed(&value), // Derived from status
+                    confirmation_count: Self::calculate_confirmation_count(&value), // Calculate from status
+                    status_description: Self::get_slot_status_description(&value), // Get human-readable status
                 };
 
                 publisher
@@ -373,6 +379,13 @@ impl KafkaPlugin {
                         .collect(),
                     None => vec![],
                 },
+                compute_units_consumed: transaction_status_meta.compute_units_consumed.unwrap_or(0)
+                    as u32,
+                error_logs: match &transaction_status_meta.status {
+                    Err(e) => vec![e.to_string()],
+                    Ok(_) => vec![],
+                },
+                is_successful: transaction_status_meta.status.is_ok(),
             }),
             transaction: Some(SanitizedTransaction {
                 message_hash: transaction.message_hash().to_bytes().into(),
@@ -471,6 +484,23 @@ impl KafkaPlugin {
                     .map(|x| x.as_ref().into())
                     .collect(),
             }),
+            // Enhanced analytics fields
+            compute_units_consumed: transaction_status_meta.compute_units_consumed.unwrap_or(0)
+                as u32,
+            total_cost: transaction_status_meta.fee, // Just fee for now
+            instruction_count: transaction.message().instructions().len() as u32,
+            account_count: transaction.message().account_keys().len() as u32,
+            execution_time_ns: 0, // Not available in Agave 2.3.7
+            is_successful: transaction_status_meta.status.is_ok(),
+            execution_logs: match &transaction_status_meta.log_messages {
+                Some(v) => v.to_owned(),
+                None => vec![],
+            },
+            error_details: match &transaction_status_meta.status {
+                Err(e) => vec![e.to_string()],
+                Ok(_) => vec![],
+            },
+            confirmation_count: 0, // Not available in Agave 2.3.7
         }
     }
 
@@ -484,6 +514,39 @@ impl KafkaPlugin {
                 // Err should never happen because wants_account_key only returns false if the input is &[u8; 32]
                 Err(_err) => debug!("Ignoring update for account key: {:?}", info.owner),
             };
+        }
+    }
+
+    /// Determine if slot is confirmed based on status
+    fn is_slot_confirmed(status: &SlotStatus) -> bool {
+        matches!(status, SlotStatus::Confirmed | SlotStatus::Rooted)
+    }
+
+    /// Get human-readable slot status description
+    fn get_slot_status_description(status: &SlotStatus) -> String {
+        match status {
+            SlotStatus::Processed => "Processed - highest slot of heaviest fork".to_string(),
+            SlotStatus::Rooted => {
+                "Rooted - highest slot having reached max vote lockout".to_string()
+            }
+            SlotStatus::Confirmed => "Confirmed - voted on by supermajority of cluster".to_string(),
+            SlotStatus::FirstShredReceived => "First shred received".to_string(),
+            SlotStatus::Completed => "Completed".to_string(),
+            SlotStatus::CreatedBank => "Created bank".to_string(),
+            SlotStatus::Dead => "Dead - fork has been abandoned".to_string(),
+        }
+    }
+
+    /// Calculate confirmation count based on slot status
+    fn calculate_confirmation_count(status: &SlotStatus) -> u32 {
+        match status {
+            SlotStatus::Processed => 0,          // Not confirmed yet
+            SlotStatus::Rooted => 2,             // Fully confirmed (rooted)
+            SlotStatus::Confirmed => 1,          // Confirmed by supermajority
+            SlotStatus::FirstShredReceived => 0, // Early stage
+            SlotStatus::Completed => 1,          // Considered confirmed
+            SlotStatus::CreatedBank => 0,        // Early stage
+            SlotStatus::Dead => 0,               // Abandoned fork
         }
     }
 }
