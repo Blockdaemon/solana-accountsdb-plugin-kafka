@@ -96,6 +96,7 @@ The following config is a minimal example that demonstrates the structure, but w
     "wrap_messages": false
   }]
 }
+```
 
 **For Testing/Development (Recommended):**
 ```json
@@ -111,7 +112,6 @@ The following config is a minimal example that demonstrates the structure, but w
     "publish_all_accounts": true
   }]
 }
-```
 ```
 
 ### Reference
