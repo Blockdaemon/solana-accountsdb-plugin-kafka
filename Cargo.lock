@@ -2440,9 +2440,9 @@ dependencies = [
 
 [[package]]
 name = "solana-curve25519"
-version = "2.3.10"
+version = "2.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "946ba468216b901ecfc9476497aeaa985745652bf312dbdc7d72dbe702916b9b"
+checksum = "b7d15f552a005c5a086772d9b988a3446563f5eb9da1e4ab174a24a98562d785"
 dependencies = [
  "bytemuck",
  "bytemuck_derive",
@@ -3338,9 +3338,9 @@ dependencies = [
 
 [[package]]
 name = "solana-zk-sdk"
-version = "2.3.10"
+version = "2.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fbc771177d65034eaa27dd66f809ca1c52beebaa92eefd23d560c394dd006f2"
+checksum = "7923d08bc41cfd246ee614693147310f86f7a73d5835b15b2e36c6d2b45d0fde"
 dependencies = [
  "aes-gcm-siv",
  "base64 0.22.1",
