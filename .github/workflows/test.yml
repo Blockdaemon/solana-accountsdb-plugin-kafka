@@ -38,12 +38,20 @@ jobs:
           profile: minimal
           components: rustfmt, clippy
 
+      - name: Install cargo-cache
+        run: cargo install cargo-cache
+
       - uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}-${{ env.RUST_STABLE }}
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+
+      - name: Clean cargo cache
+        run: cargo cache --autoclean
 
       - name: cargo fmt
         uses: actions-rs/cargo@v1
