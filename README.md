@@ -5,6 +5,7 @@ Kafka publisher for use with Solana's [plugin framework](https://docs.solana.com
 ## What This Plugin Does
 
 Streams **three types** of Solana data to Kafka:
+
 - **Account Updates**: Balance changes, data modifications, owner changes
 - **Transactions**: Complete transaction details, instructions, fees, success/failure
 - **Slot Status**: Network progress, confirmation status, health metrics
@@ -34,7 +35,7 @@ This will publish **all** account updates, transactions, and slot status to Kafk
 
 ### Binary releases
 
-Find binary releases [here](https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka/releases).
+Find binary releases [on GitHub](https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka/releases).
 
 ### Building from source
 
@@ -99,6 +100,7 @@ The following config is a minimal example that demonstrates the structure, but w
 ```
 
 **For Testing/Development (Recommended):**
+
 ```json
 {
   "libpath": "target/release/libsolana_accountsdb_plugin_kafka.so",
@@ -158,7 +160,8 @@ The plugin uses a **whitelist approach** for filtering. By default, most events 
 
 #### Common Filtering Scenarios
 
-**Scenario 1: See Everything (Recommended for testing)**
+### Scenario 1: See Everything (Recommended for testing)
+
 ```json
 {
   "publish_all_accounts": true,
@@ -167,7 +170,8 @@ The plugin uses a **whitelist approach** for filtering. By default, most events 
 }
 ```
 
-**Scenario 2: See Specific Programs Only**
+### Scenario 2: See Specific Programs Only
+
 ```json
 {
   "publish_all_accounts": false,
@@ -178,7 +182,8 @@ The plugin uses a **whitelist approach** for filtering. By default, most events 
 }
 ```
 
-**Scenario 3: See Specific Accounts Only**
+### Scenario 3: See Specific Accounts Only
+
 ```json
 {
   "publish_all_accounts": false,
@@ -240,21 +245,25 @@ All transaction types are enhanced with comprehensive analytics metadata.
 All transactions provide additional analytics data that can be used for:
 
 #### Performance Monitoring
+
 - **Compute Units**: Actual compute units consumed by transactions
 - **Pricing Information**: Compute unit pricing from ComputeBudget instructions
 - **Cost Analysis**: Transaction fees and compute costs
 
 #### Error Analysis & Debugging
+
 - **Error Detection**: Reliable error status from transaction metadata
 - **Success Tracking**: Transaction success/failure status
 - **Error Details**: Structured error information without log parsing
 
 #### Address Intelligence
+
 - **Address Lookup Tables**: Support for V0 LUT transactions
 - **Loaded Address Details**: Index and writable status for loaded addresses
 - **Account Metadata**: Enhanced account information and versioning
 
 #### Slot & Network Analytics
+
 - **Confirmation Status**: Smart confirmation counting based on slot status
 - **Status Descriptions**: Human-readable slot status descriptions
 - **Progress Tracking**: Slot progression monitoring
@@ -264,16 +273,19 @@ All transactions provide additional analytics data that can be used for:
 The protobuf schema has been enhanced with analytics fields:
 
 #### UpdateAccountEvent
+
 - `data_version`: Account data version for change tracking
 - `is_startup`: Whether this is a startup account update
 - `account_age`: Approximate account age in slots
 
 #### SlotStatusEvent
+
 - `is_confirmed`: Whether slot is confirmed by supermajority
 - `confirmation_count`: Confirmation level (0-2 based on status)
 - `status_description`: Human-readable status description
 
 #### TransactionEvent
+
 - `compute_units_consumed`: Actual compute units used
 - `compute_units_price`: Compute unit pricing in micro-lamports
 - `total_cost`: Total transaction cost (fee + compute)
@@ -286,6 +298,7 @@ The protobuf schema has been enhanced with analytics fields:
 - `confirmation_count`: Number of confirmations
 
 #### LoadedAddresses
+
 - `writable_info`: Detailed writable address information
 - `readonly_info`: Detailed readonly address information
 
@@ -317,6 +330,7 @@ Analytics enhancements enable new use cases:
 **Symptoms**: Solana validator shows slot processing but no messages appear in Kafka topics.
 
 **Causes & Solutions**:
+
 - **Filtering too restrictive**: Set `publish_all_accounts: true` or add specific `program_filters`
 - **Wrong topic names**: Verify your topic names match exactly
 - **Kafka connection issues**: Check if Kafka is running and accessible
@@ -333,6 +347,7 @@ Analytics enhancements enable new use cases:
 #### 3. Plugin Fails to Load
 
 **Common Causes**:
+
 - **Version mismatch**: Ensure Solana and plugin are built with identical Rust/Solana versions
 - **Library path**: Check `libpath` points to the correct `.so` or `.dylib` file
 - **Permissions**: Ensure the plugin file is readable by the Solana process
@@ -342,6 +357,7 @@ Analytics enhancements enable new use cases:
 **Cause**: Large Kafka producer buffers can consume significant memory.
 
 **Solution**: Adjust buffer settings:
+
 ```json
 {
   "kafka": {
@@ -361,6 +377,7 @@ Analytics enhancements enable new use cases:
 ### Getting Help
 
 If you're still having issues:
+
 1. Check this troubleshooting section
 2. Review the filtering documentation above
 3. Try the Quick Start configuration
