@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.2.0+agave.2.3.8"
+version = "0.2.0+agave.2.3.13"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
