@@ -19,7 +19,7 @@ use {
             StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
             UPLOAD_TRANSACTIONS_TOTAL,
         },
-        Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
+        BlockEvent, Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
     },
     prost::Message,
     rdkafka::{
@@ -107,6 +107,25 @@ impl Publisher {
             .with_label_values(&[if result.is_ok() { "success" } else { "failed" }])
             .inc();
         result
+    }
+    pub fn update_block(
+        &self,
+        ev: BlockEvent,
+        wrap_messages: bool,
+        topic: &str,
+    ) -> Result<(), KafkaError> {
+        let temp_key;
+        let (key, buf) = if wrap_messages {
+            temp_key = self.copy_and_prepend(ev.blockhash.as_slice(), b'B');
+            (
+                &temp_key,
+                Self::encode_with_wrapper(EventMessage::Block(Box::new(ev))),
+            )
+        } else {
+            (&ev.blockhash, ev.encode_to_vec())
+        };
+        let record = BaseRecord::<Vec<u8>, _>::to(topic).key(key).payload(&buf);
+        self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
     }
 
     fn encode_with_wrapper(message: EventMessage) -> Vec<u8> {

@@ -44,6 +44,10 @@ pub struct Config {
     /// Accounts, transactions filters
     pub filters: Vec<ConfigFilter>,
 
+    /// Kafka topic to send block events to.
+    #[serde(default)]
+    pub block_events_topic: Option<String>,
+
     /// Prometheus endpoint.
     #[serde(default)]
     pub prometheus: Option<SocketAddr>,
@@ -57,6 +61,7 @@ impl Default for Config {
             shutdown_timeout_ms: 30_000,
             filters: vec![],
             prometheus: None,
+            block_events_topic: None,
         }
     }
 }

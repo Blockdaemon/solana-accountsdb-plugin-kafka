@@ -226,5 +226,42 @@ message MessageWrapper {
     UpdateAccountEvent account = 1;
     SlotStatusEvent slot = 2;
     TransactionEvent transaction = 3;
+    BlockEvent block = 4;
   }
+}
+message RewardsAndNumPartitions {
+  // List of rewards.
+  repeated Reward rewards = 1;
+
+  // Number of partitions (optional).
+  optional uint64 num_partitions = 2;
+}
+
+message BlockEvent {
+  // Parent slot number.
+  uint64 parent_slot = 1;
+
+  // Parent blockhash.
+  bytes parent_blockhash = 2;
+
+  // Current slot number.
+  uint64 slot = 3;
+
+  // Current blockhash.
+  bytes blockhash = 4;
+
+  // Rewards and number of partitions.
+  RewardsAndNumPartitions rewards = 5;
+
+  // Estimated production time, as a Unix timestamp (optional).
+  optional int64 block_time = 6;
+
+  // Block height (optional).
+  optional uint64 block_height = 7;
+
+  // Number of executed transactions in the block.
+  uint64 executed_transaction_count = 8;
+
+  // Number of entries in the block.
+  uint64 entry_count = 9;
 }
