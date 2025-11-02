@@ -31,7 +31,7 @@ pub use {
     publisher::Publisher,
 };
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[allow(improper_ctypes_definitions)]
 /// # Safety
 ///

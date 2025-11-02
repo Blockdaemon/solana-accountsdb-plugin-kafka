@@ -242,13 +242,13 @@ message BlockEvent {
   uint64 parent_slot = 1;
 
   // Parent blockhash.
-  bytes parent_blockhash = 2;
+  string parent_blockhash = 2;
 
   // Current slot number.
   uint64 slot = 3;
 
   // Current blockhash.
-  bytes blockhash = 4;
+  string blockhash = 4;
 
   // Rewards and number of partitions.
   RewardsAndNumPartitions rewards = 5;

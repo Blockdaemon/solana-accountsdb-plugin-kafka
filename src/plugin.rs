@@ -14,12 +14,12 @@
 
 use {
     crate::{
-        sanitized_message, BlockEvent, CompiledInstruction, Config, Filter, InnerInstruction,
-        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
-        MessageAddressTableLookup, MessageHeader, PrometheusService, Publisher, Reward,
-        RewardsAndNumPartitions, SanitizedMessage, SanitizedTransaction, SlotStatus,
-        SlotStatusEvent, TransactionEvent, TransactionStatusMeta, TransactionTokenBalance,
-        UiTokenAmount, UpdateAccountEvent, V0LoadedMessage, V0Message,
+        BlockEvent, CompiledInstruction, Config, Filter, InnerInstruction, InnerInstructions,
+        LegacyLoadedMessage, LegacyMessage, LoadedAddresses, MessageAddressTableLookup,
+        MessageHeader, PrometheusService, Publisher, Reward, RewardsAndNumPartitions,
+        SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
+        TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
+        V0LoadedMessage, V0Message, sanitized_message,
     },
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
@@ -30,7 +30,7 @@ use {
     base58::FromBase58,
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
-    solana_pubkey::{pubkey, Pubkey},
+    solana_pubkey::{Pubkey, pubkey},
     std::fmt::{Debug, Formatter},
 };
 
@@ -253,10 +253,14 @@ impl KafkaPlugin {
     fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfoV3 {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaAccountInfoVersions::V0_0_2(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaAccountInfoVersions::V0_0_3(info) => info,
         }
@@ -267,10 +271,14 @@ impl KafkaPlugin {
     ) -> &ReplicaTransactionInfoV3 {
         match transaction {
             ReplicaTransactionInfoVersions::V0_0_1(_info) => {
-                panic!("ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaTransactionInfoVersions::V0_0_2(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaTransactionInfoVersions::V0_0_3(info) => info,
         }
@@ -278,13 +286,19 @@ impl KafkaPlugin {
     fn unwrap_block_metadata(block: ReplicaBlockInfoVersions) -> &ReplicaBlockInfoV4 {
         match block {
             ReplicaBlockInfoVersions::V0_0_1(_info) => {
-                panic!("ReplicaBlockInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaBlockInfoVersions::V0_0_2(_info) => {
-                panic!("ReplicaBlockInfoVersions::V0_0_2 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaBlockInfoVersions::V0_0_3(_info) => {
-                panic!("ReplicaBlockInfoVersions::V0_0_3 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_3 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaBlockInfoVersions::V0_0_4(info) => info,
         }
@@ -739,9 +753,9 @@ impl KafkaPlugin {
             .collect();
         BlockEvent {
             parent_slot: block.parent_slot,
-            parent_blockhash: block.parent_blockhash.from_base58().unwrap(),
+            parent_blockhash: block.parent_blockhash.to_owned(),
             slot: block.slot,
-            blockhash: block.blockhash.from_base58().unwrap(),
+            blockhash: block.blockhash.to_owned(),
             rewards: Some(RewardsAndNumPartitions {
                 rewards,
                 num_partitions: block.rewards.num_partitions,

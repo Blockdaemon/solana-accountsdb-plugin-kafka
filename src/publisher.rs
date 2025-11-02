@@ -14,12 +14,12 @@
 
 use {
     crate::{
+        BlockEvent, Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
         message_wrapper::EventMessage::{self, Account, Slot, Transaction},
         prom::{
             StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
             UPLOAD_TRANSACTIONS_TOTAL,
         },
-        BlockEvent, Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
     },
     prost::Message,
     rdkafka::{
@@ -116,13 +116,14 @@ impl Publisher {
     ) -> Result<(), KafkaError> {
         let temp_key;
         let (key, buf) = if wrap_messages {
-            temp_key = self.copy_and_prepend(ev.blockhash.as_slice(), b'B');
+            temp_key = self.copy_and_prepend(ev.blockhash.as_bytes(), b'B');
             (
                 &temp_key,
                 Self::encode_with_wrapper(EventMessage::Block(Box::new(ev))),
             )
         } else {
-            (&ev.blockhash, ev.encode_to_vec())
+            temp_key = ev.blockhash.as_bytes().to_vec();
+            (&temp_key, ev.encode_to_vec())
         };
         let record = BaseRecord::<Vec<u8>, _>::to(topic).key(key).payload(&buf);
         self.producer.send(record).map(|_| ()).map_err(|(e, _)| e)
