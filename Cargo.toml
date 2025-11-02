@@ -34,7 +34,6 @@ tower = { version = "*", features = ["make"] }
 bytes = "*"
 http-body-util = "*"
 http = "*"
-base58 = "*"
 
 [build-dependencies]
 anyhow = "*"

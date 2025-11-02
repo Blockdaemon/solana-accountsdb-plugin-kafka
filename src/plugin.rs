@@ -27,7 +27,6 @@ use {
         ReplicaTransactionInfoV3, ReplicaTransactionInfoVersions, Result as PluginResult,
         SlotStatus as PluginSlotStatus,
     },
-    base58::FromBase58,
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
     solana_pubkey::{Pubkey, pubkey},
