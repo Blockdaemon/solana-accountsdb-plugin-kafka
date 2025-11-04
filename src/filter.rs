@@ -111,16 +111,20 @@ mod tests {
         let filter = Filter::new(&config);
         assert_eq!(filter.program_ignores.len(), 2);
 
-        assert!(filter.wants_program(
-            &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
-                .unwrap()
-                .to_bytes()
-        ));
-        assert!(!filter.wants_program(
-            &Pubkey::from_str("Vote111111111111111111111111111111111111111")
-                .unwrap()
-                .to_bytes()
-        ));
+        assert!(
+            filter.wants_program(
+                &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
+        assert!(
+            !filter.wants_program(
+                &Pubkey::from_str("Vote111111111111111111111111111111111111111")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
     }
 
     #[test]
@@ -137,22 +141,28 @@ mod tests {
         let filter = Filter::new(&config);
         assert_eq!(filter.program_ignores.len(), 2);
 
-        assert!(filter.wants_program(
-            &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
-                .unwrap()
-                .to_bytes()
-        ));
-        assert!(!filter.wants_program(
-            &Pubkey::from_str("Vote111111111111111111111111111111111111111")
-                .unwrap()
-                .to_bytes()
-        ));
+        assert!(
+            filter.wants_program(
+                &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
+        assert!(
+            !filter.wants_program(
+                &Pubkey::from_str("Vote111111111111111111111111111111111111111")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
 
-        assert!(!filter.wants_program(
-            &Pubkey::from_str("cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ")
-                .unwrap()
-                .to_bytes()
-        ));
+        assert!(
+            !filter.wants_program(
+                &Pubkey::from_str("cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
     }
 
     #[test]
@@ -175,16 +185,20 @@ mod tests {
                 .to_bytes()
         );
 
-        assert!(filter.wants_program(
-            &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
-                .unwrap()
-                .to_bytes()
-        ));
+        assert!(
+            filter.wants_program(
+                &Pubkey::from_str("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
 
-        assert!(filter.wants_account(
-            &Pubkey::from_str("5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht")
-                .unwrap()
-                .to_bytes()
-        ));
+        assert!(
+            filter.wants_account(
+                &Pubkey::from_str("5KKsLVU6TcbVDK4BS6K1DGDxnh4Q9xjYJ8XaDCG5t8ht")
+                    .unwrap()
+                    .to_bytes()
+            )
+        );
     }
 }

@@ -14,21 +14,22 @@
 
 use {
     crate::{
-        sanitized_message, CompiledInstruction, Config, Filter, InnerInstruction,
-        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
-        MessageAddressTableLookup, MessageHeader, PrometheusService, Publisher, Reward,
+        BlockEvent, CompiledInstruction, Config, Filter, InnerInstruction, InnerInstructions,
+        LegacyLoadedMessage, LegacyMessage, LoadedAddresses, MessageAddressTableLookup,
+        MessageHeader, PrometheusService, Publisher, Reward, RewardsAndNumPartitions,
         SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
         TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
-        V0LoadedMessage, V0Message,
+        V0LoadedMessage, V0Message, sanitized_message,
     },
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
-        ReplicaAccountInfoVersions, ReplicaTransactionInfoV3, ReplicaTransactionInfoVersions,
-        Result as PluginResult, SlotStatus as PluginSlotStatus,
+        ReplicaAccountInfoVersions, ReplicaBlockInfoV4, ReplicaBlockInfoVersions,
+        ReplicaTransactionInfoV3, ReplicaTransactionInfoVersions, Result as PluginResult,
+        SlotStatus as PluginSlotStatus,
     },
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
-    solana_pubkey::{pubkey, Pubkey},
+    solana_pubkey::{Pubkey, pubkey},
     std::fmt::{Debug, Formatter},
 };
 
@@ -36,6 +37,7 @@ use {
 pub struct KafkaPlugin {
     publisher: Option<Publisher>,
     filter: Option<Vec<Filter>>,
+    block_event_topic: Option<String>,
     prometheus: Option<PrometheusService>,
 }
 
@@ -204,6 +206,16 @@ impl GeyserPlugin for KafkaPlugin {
 
         Ok(())
     }
+    fn notify_block_metadata(&self, blockinfo: ReplicaBlockInfoVersions) -> PluginResult<()> {
+        let Some(topic) = &self.block_event_topic else {
+            return Ok(());
+        };
+        let info = Self::unwrap_block_metadata(blockinfo);
+        let publisher = self.unwrap_publisher();
+        let event = Self::build_block_event(info.clone());
+        publisher.update_block(event, true, topic).unwrap();
+        Ok(())
+    }
 
     fn account_data_notifications_enabled(&self) -> bool {
         let filters = self.unwrap_filters();
@@ -240,10 +252,14 @@ impl KafkaPlugin {
     fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfoV3 {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaAccountInfoVersions::V0_0_2(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaAccountInfoVersions::V0_0_3(info) => info,
         }
@@ -254,12 +270,36 @@ impl KafkaPlugin {
     ) -> &ReplicaTransactionInfoV3 {
         match transaction {
             ReplicaTransactionInfoVersions::V0_0_1(_info) => {
-                panic!("ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaTransactionInfoVersions::V0_0_2(_info) => {
-                panic!("ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node.");
+                panic!(
+                    "ReplicaAccountInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
             }
             ReplicaTransactionInfoVersions::V0_0_3(info) => info,
+        }
+    }
+    fn unwrap_block_metadata(block: ReplicaBlockInfoVersions) -> &ReplicaBlockInfoV4 {
+        match block {
+            ReplicaBlockInfoVersions::V0_0_1(_info) => {
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_1 unsupported, please upgrade your Solana node."
+                );
+            }
+            ReplicaBlockInfoVersions::V0_0_2(_info) => {
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_2 unsupported, please upgrade your Solana node."
+                );
+            }
+            ReplicaBlockInfoVersions::V0_0_3(_info) => {
+                panic!(
+                    "ReplicaBlockInfoVersions::V0_0_3 unsupported, please upgrade your Solana node."
+                );
+            }
+            ReplicaBlockInfoVersions::V0_0_4(info) => info,
         }
     }
 
@@ -689,6 +729,40 @@ impl KafkaPlugin {
             SlotStatus::Completed => 1,          // Considered confirmed
             SlotStatus::CreatedBank => 0,        // Early stage
             SlotStatus::Dead => 0,               // Abandoned fork
+        }
+    }
+    fn build_block_event(block: ReplicaBlockInfoV4) -> BlockEvent {
+        let rewards = block
+            .rewards
+            .rewards
+            .iter()
+            .map(|x| Reward {
+                pubkey: x.pubkey.clone(),
+                lamports: x.lamports,
+                post_balance: x.post_balance,
+                reward_type: match x.reward_type {
+                    Some(r) => r as i32,
+                    None => 0,
+                },
+                commission: match x.commission {
+                    Some(v) => v as u32,
+                    None => 0,
+                },
+            })
+            .collect();
+        BlockEvent {
+            parent_slot: block.parent_slot,
+            parent_blockhash: block.parent_blockhash.to_owned(),
+            slot: block.slot,
+            blockhash: block.blockhash.to_owned(),
+            rewards: Some(RewardsAndNumPartitions {
+                rewards,
+                num_partitions: block.rewards.num_partitions,
+            }),
+            block_time: block.block_time,
+            block_height: block.block_height,
+            executed_transaction_count: block.executed_transaction_count,
+            entry_count: block.entry_count,
         }
     }
 }
