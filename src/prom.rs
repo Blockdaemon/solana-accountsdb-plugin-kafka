@@ -3,7 +3,7 @@ use {
     bytes::Bytes,
     http::StatusCode,
     http_body_util::Full,
-    hyper::{body::Incoming, service::service_fn, Request, Response},
+    hyper::{Request, Response, body::Incoming, service::service_fn},
     hyper_util::rt::TokioIo,
     log::*,
     prometheus::{GaugeVec, IntCounterVec, Opts, Registry, TextEncoder},
