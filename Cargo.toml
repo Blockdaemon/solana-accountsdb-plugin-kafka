@@ -27,8 +27,7 @@ log = "*"
 prometheus = "*"
 prost = "*"
 rdkafka = { version = "*", features = ["ssl", "sasl"] }
-serde = { version = "=1.0.219", features = ["derive"] }
-serde_derive = "=1.0.219" # Newer than this no longer has the __private API
+serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
 tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync", "net"] }
 tower = { version = "*", features = ["make"] }
