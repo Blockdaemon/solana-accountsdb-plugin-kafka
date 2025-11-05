@@ -15,9 +15,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set env vars
+        id: set-vars
         run: |
           rust_stable=$(rustc --version | awk '{print $2}')
-          echo "RUST_STABLE=$rust_stable" | tee -a $GITHUB_ENV
+          echo "rust_stable=$rust_stable" >> "$GITHUB_OUTPUT"
+          echo "RUST_STABLE=$rust_stable" >> "$GITHUB_ENV"
 
       - name: Install build requirements
         if: runner.os == 'Linux'
@@ -33,7 +35,7 @@ jobs:
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_STABLE }}
+          toolchain: ${{ steps.set-vars.outputs.rust_stable }}
           override: true
           profile: minimal
           components: rustfmt, clippy
