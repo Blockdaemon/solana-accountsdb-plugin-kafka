@@ -249,7 +249,7 @@ impl KafkaPlugin {
         self.filter.as_ref().expect("filter is unavailable")
     }
 
-    fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfoV3 {
+    fn unwrap_update_account(account: ReplicaAccountInfoVersions<'_>) -> &ReplicaAccountInfoV3<'_> {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(_info) => {
                 panic!(
@@ -266,8 +266,8 @@ impl KafkaPlugin {
     }
 
     fn unwrap_transaction(
-        transaction: ReplicaTransactionInfoVersions,
-    ) -> &ReplicaTransactionInfoV3 {
+        transaction: ReplicaTransactionInfoVersions<'_>,
+    ) -> &ReplicaTransactionInfoV3<'_> {
         match transaction {
             ReplicaTransactionInfoVersions::V0_0_1(_info) => {
                 panic!(
@@ -282,7 +282,7 @@ impl KafkaPlugin {
             ReplicaTransactionInfoVersions::V0_0_3(info) => info,
         }
     }
-    fn unwrap_block_metadata(block: ReplicaBlockInfoVersions) -> &ReplicaBlockInfoV4 {
+    fn unwrap_block_metadata(block: ReplicaBlockInfoVersions<'_>) -> &ReplicaBlockInfoV4<'_> {
         match block {
             ReplicaBlockInfoVersions::V0_0_1(_info) => {
                 panic!(
@@ -627,21 +627,20 @@ impl KafkaPlugin {
         for instruction in instructions {
             // Check if this is a compute budget instruction
             let program_id_index = instruction.program_id_index as usize;
-            if let Some(account_keys) = Self::get_account_keys_from_message(message) {
-                if program_id_index < account_keys.len() {
-                    let program_id = &account_keys[program_id_index];
+            if let Some(account_keys) = Self::get_account_keys_from_message(message)
+                .filter(|keys| program_id_index < keys.len())
+            {
+                let program_id = &account_keys[program_id_index];
 
-                    if *program_id == Self::COMPUTE_BUDGET_PROGRAM_ID {
-                        // Parse compute budget instruction data to extract price
-                        let data = &instruction.data;
-                        if data.len() >= 9 && data[0] == 3 {
-                            // SetComputeUnitPrice instruction (discriminator 3)
-                            let price = u64::from_le_bytes([
-                                data[1], data[2], data[3], data[4], data[5], data[6], data[7],
-                                data[8],
-                            ]);
-                            return price;
-                        }
+                if *program_id == Self::COMPUTE_BUDGET_PROGRAM_ID {
+                    // Parse compute budget instruction data to extract price
+                    let data = &instruction.data;
+                    if data.len() >= 9 && data[0] == 3 {
+                        // SetComputeUnitPrice instruction (discriminator 3)
+                        let price = u64::from_le_bytes([
+                            data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8],
+                        ]);
+                        return price;
                     }
                 }
             }
