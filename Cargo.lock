@@ -2499,9 +2499,9 @@ dependencies = [
 
 [[package]]
 name = "solana-instruction"
-version = "2.3.1"
+version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c54769c7e58fc7653658c49b39b935ff6673260cba4ae033b21580a79ca73c90"
+checksum = "507e62b9c6891c7e0f5cb0594da10646ec5ea09bfdf5e3498253f07f8a6c6c04"
 dependencies = [
  "bincode",
  "borsh 1.5.7",
