@@ -37,7 +37,7 @@ use {
 pub struct KafkaPlugin {
     publisher: Option<Publisher>,
     filter: Option<Vec<Filter>>,
-    block_event_topic: Option<String>,
+    block_events_topic: Option<(String, bool)>,
     prometheus: Option<PrometheusService>,
 }
 
@@ -81,6 +81,9 @@ impl GeyserPlugin for KafkaPlugin {
         self.publisher = Some(publisher);
         self.filter = Some(config.filters.iter().map(Filter::new).collect());
         self.prometheus = prometheus;
+        self.block_events_topic = config
+            .block_events_topic
+            .map(|b| (b.topic, b.wrap_messages));
         info!("Spawned producer");
 
         Ok(())
@@ -207,13 +210,15 @@ impl GeyserPlugin for KafkaPlugin {
         Ok(())
     }
     fn notify_block_metadata(&self, blockinfo: ReplicaBlockInfoVersions) -> PluginResult<()> {
-        let Some(topic) = &self.block_event_topic else {
+        let Some((topic, wrap_messages)) = &self.block_events_topic else {
             return Ok(());
         };
         let info = Self::unwrap_block_metadata(blockinfo);
         let publisher = self.unwrap_publisher();
         let event = Self::build_block_event(info.clone());
-        publisher.update_block(event, true, topic).unwrap();
+        publisher
+            .update_block(event, *wrap_messages, topic)
+            .unwrap();
         Ok(())
     }
 
