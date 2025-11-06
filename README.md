@@ -85,7 +85,10 @@ The following config is a minimal example that demonstrates the structure, but w
     "statistics.interval.ms": "1000"
   },
   "shutdown_timeout_ms": 30000,
-  "block_events_topic":"solana.testnet.blocks_metadata",
+  "block_events_topic": {
+      "topic": "solana.testnet.block_events",
+      "wrap_messages": true
+  },
   "filters": [{
     "update_account_topic": "solana.testnet.account_updates",
     "slot_status_topic": "solana.testnet.slot_status",

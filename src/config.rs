@@ -46,7 +46,7 @@ pub struct Config {
 
     /// Kafka topic to send block events to.
     #[serde(default)]
-    pub block_events_topic: Option<String>,
+    pub block_events_topic: Option<BlockEventsConfig>,
 
     /// Prometheus endpoint.
     #[serde(default)]
@@ -144,6 +144,12 @@ impl Default for ConfigFilter {
             wrap_messages: false,
         }
     }
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct BlockEventsConfig {
+    pub topic: String,
+    pub wrap_messages: bool,
 }
 
 pub type Producer = ThreadedProducer<DefaultProducerContext>;
