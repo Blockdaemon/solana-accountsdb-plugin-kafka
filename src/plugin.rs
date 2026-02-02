@@ -103,7 +103,7 @@ impl GeyserPlugin for KafkaPlugin {
             return Ok(());
         }
 
-        let info = Self::unwrap_update_account(account);
+        let info = Self::unwrap_update_account(&account);
         let publisher = self.unwrap_publisher();
         for filter in filters {
             if !filter.update_account_topic.is_empty() {
@@ -169,7 +169,7 @@ impl GeyserPlugin for KafkaPlugin {
         transaction: ReplicaTransactionInfoVersions,
         slot: u64,
     ) -> PluginResult<()> {
-        let info = Self::unwrap_transaction(transaction);
+        let info = Self::unwrap_transaction(&transaction);
         let publisher = self.unwrap_publisher();
         for filter in self.unwrap_filters() {
             if !filter.transaction_topic.is_empty() {
@@ -186,7 +186,7 @@ impl GeyserPlugin for KafkaPlugin {
                     .message()
                     .account_keys()
                     .iter()
-                    .any(|pubkey| {
+                    .any(|pubkey: &Pubkey| {
                         filter.wants_program(pubkey.as_ref())
                             || filter.wants_account(pubkey.as_ref())
                     })
@@ -233,7 +233,9 @@ impl KafkaPlugin {
         self.filter.as_ref().expect("filter is unavailable")
     }
 
-    fn unwrap_update_account(account: ReplicaAccountInfoVersions) -> &ReplicaAccountInfoV3 {
+    fn unwrap_update_account<'a>(
+        account: &'a ReplicaAccountInfoVersions,
+    ) -> &'a ReplicaAccountInfoV3<'a> {
         match account {
             ReplicaAccountInfoVersions::V0_0_1(_info) => {
                 panic!("ReplicaAccountInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
@@ -245,9 +247,9 @@ impl KafkaPlugin {
         }
     }
 
-    fn unwrap_transaction(
-        transaction: ReplicaTransactionInfoVersions,
-    ) -> &ReplicaTransactionInfoV2 {
+    fn unwrap_transaction<'a>(
+        transaction: &'a ReplicaTransactionInfoVersions,
+    ) -> &'a ReplicaTransactionInfoV2<'a> {
         match transaction {
             ReplicaTransactionInfoVersions::V0_0_1(_info) => {
                 panic!("ReplicaTransactionInfoVersions::V0_0_1 unsupported, please upgrade your Solana node.");
