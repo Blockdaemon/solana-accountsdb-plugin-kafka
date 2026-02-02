@@ -4,3 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    # Pinned for Rust 1.86; do not update (vergen 9.1.0+ and time 0.3.45+ require rustc 1.88)
+    ignore:
+      - dependency-name: "vergen"
+      - dependency-name: "time"
