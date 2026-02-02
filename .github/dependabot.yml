@@ -42,6 +42,11 @@ updates:
       # Block Solana 3.x upgrades (would break compatibility)
       - dependency-name: "solana-*"
         versions: [">=3.0.0"]
+      # Pinned for Rust 1.86 on v2.3; vergen 9.1.0+ and time 0.3.45+ require rustc 1.88
+      - dependency-name: "vergen"
+        versions: [">=9.0.7"]
+      - dependency-name: "time"
+        versions: [">=0.3.45"]
     # Group related updates together
     groups:
       agave-updates:
