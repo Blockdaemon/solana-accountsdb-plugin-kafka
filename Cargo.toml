@@ -20,6 +20,9 @@ solana-message = { version = "=2.4" }
 solana-pubkey = { version = "=2.4" }
 solana-transaction-status = { version = "~2.3" }
 
+bytes = "*"
+http-body-util = "*"
+http = "*"
 hyper = { version = "*", features = ["http1", "server"] }
 hyper-util = { version = "*", features = ["tokio", "server"] }
 lazy_static = "*"
@@ -31,16 +34,16 @@ serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
 tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync", "net"] }
 tower = { version = "*", features = ["make"] }
-bytes = "*"
-http-body-util = "*"
-http = "*"
 
 [build-dependencies]
 anyhow = "*"
 cargo-lock = "*"
 git-version = "*"
 prost-build = "*"
-vergen = { version = "*", features = ["build", "rustc"] }
+# Exact pin for Rust 1.86; time 0.3.45+ requires rustc 1.88. Vergen pulls in time ^0.3.37.
+time = "=0.3.44"
+# Exact pin for Rust 1.86; vergen 9.1.0+ requires rustc 1.88.
+vergen = { version = "=9.0.6", features = ["build", "rustc"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
