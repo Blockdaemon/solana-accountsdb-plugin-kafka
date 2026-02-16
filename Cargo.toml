@@ -14,11 +14,11 @@ categories = ["cryptography::cryptocurrencies", "database", "network-programming
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-agave-geyser-plugin-interface = { version = "~3.1" }
-solana-logger = { version = "~3" }
-solana-message = { version = "~3" }
-solana-pubkey = { version = "~4" }
-solana-transaction-status = { version = "~3" }
+agave-geyser-plugin-interface = { version = "3.1" }
+solana-logger = { version = "3.0" }
+solana-message = { version = "3.1" }
+solana-pubkey = { version = "4.1" }
+solana-transaction-status = { version = "3.1" }
 
 hyper = { version = "*", features = ["http1", "server"] }
 hyper-util = { version = "*", features = ["tokio", "server"] }

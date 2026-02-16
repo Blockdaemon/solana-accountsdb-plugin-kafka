@@ -14,39 +14,37 @@ updates:
         patterns:
           - "solana-*"
       other-updates:
-        patterns:
-          - "*"
         exclude-patterns:
           - "agave-*"
           - "solana-*"
 
-  # Monitor v2.3 branch for production dependencies (restricts to 2.x)
+  # Monitor v3.1 branch for production dependencies (restricts to 3.x)
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "daily"
-    target-branch: "v2.3"
-    # Allow updates within 2.x range, prevent 3.x upgrades
+    target-branch: "v3.1"
+    # Allow updates within 3.x range, prevent 4.x upgrades
     allow:
-      # Allow updates within major version 2.x for Agave ecosystem
+      # Allow updates within major version 3.x for Agave ecosystem
       - dependency-name: "agave-geyser-plugin-interface"
-      # Allow updates within major version 2.x for Solana ecosystem
+      # Allow updates within major version 3.x for Solana ecosystem
       - dependency-name: "solana-*"
       # Allow all other dependency updates
       - dependency-name: "*"
     # Prevent major version upgrades that could break compatibility
     ignore:
-      # Block Agave 3.x upgrades (would break ABI compatibility)
+      # Block Agave 4.x upgrades (would break ABI compatibility)
       - dependency-name: "agave-geyser-plugin-interface"
-        versions: [">=3.0.0"]
-      # Block Solana 3.x upgrades (would break compatibility)
+        versions: [">=4.0.0"]
+      # Block Solana 4.x upgrades (would break compatibility)
       - dependency-name: "solana-*"
-        versions: [">=3.0.0"]
-      # Pinned for Rust 1.86 on v2.3; vergen 9.1.0+ and time 0.3.45+ require rustc 1.88
-      - dependency-name: "vergen"
-        versions: [">=9.0.7"]
-      - dependency-name: "time"
-        versions: [">=0.3.45"]
+        versions: [">=4.0.0"]
+      # Pinned for Rust 1.86 on v3.1; vergen 9.1.0+ and time 0.3.45+ require rustc 1.88
+      #- dependency-name: "vergen"
+      #  versions: [">=9.0.7"]
+      #- dependency-name: "time"
+      #  versions: [">=0.3.45"]
     # Group related updates together
     groups:
       agave-updates:
@@ -62,8 +60,6 @@ updates:
           - "patch"
           - "minor"
       other-updates:
-        patterns:
-          - "*"
         exclude-patterns:
           - "agave-*"
           - "solana-*"
