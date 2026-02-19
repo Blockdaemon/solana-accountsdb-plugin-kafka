@@ -10,13 +10,22 @@ updates:
       agave-updates:
         patterns:
           - "agave-*"
+        update-types:
+          - "patch"
+          - "minor"
       solana-updates:
         patterns:
           - "solana-*"
+        update-types:
+          - "patch"
+          - "minor"
       other-updates:
         exclude-patterns:
           - "agave-*"
           - "solana-*"
+        update-types:
+          - "patch"
+          - "minor"
 
   # Monitor v3.1 branch for production dependencies (restricts to 3.x)
   - package-ecosystem: "cargo"
@@ -63,3 +72,6 @@ updates:
         exclude-patterns:
           - "agave-*"
           - "solana-*"
+        update-types:
+          - "patch"
+          - "minor"
