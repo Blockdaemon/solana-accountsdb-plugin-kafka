@@ -2180,9 +2180,9 @@ dependencies = [
 
 [[package]]
 name = "solana-curve25519"
-version = "3.1.8"
+version = "3.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "737ede9143c36b8628cc11d920cdb762cd1ccbd7ca904c3bd63b39c58669fe38"
+checksum = "720e1d774f0404957bf112365b2720ca9af9b0d1bdf0a653b22cfb52dbaa9c9e"
 dependencies = [
  "bytemuck",
  "bytemuck_derive",
