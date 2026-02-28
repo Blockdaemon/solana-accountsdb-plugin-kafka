@@ -12,14 +12,10 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Set env vars
-        id: set-vars
-        run: |
-          rust_stable=$(rustc --version | awk '{print $2}')
-          echo "rust_stable=$rust_stable" >> "$GITHUB_OUTPUT"
-          echo "RUST_STABLE=$rust_stable" >> "$GITHUB_ENV"
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install build requirements
         if: runner.os == 'Linux'
@@ -33,20 +29,13 @@ jobs:
             libzstd-dev
           sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ steps.set-vars.outputs.rust_stable }}
-          override: true
-          profile: minimal
-          components: rustfmt, clippy
-
       - name: Install cargo-cache
         # Use --locked to pin to the exact dependency versions in cargo-cache's Cargo.lock
         # This prevents pulling in newer transitive dependencies (like home@0.5.12)
         # that require rustc 1.88, ensuring compatibility with our rustc 1.86 toolchain
         run: cargo install cargo-cache --locked
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -59,16 +48,10 @@ jobs:
         run: cargo cache --autoclean
 
       - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
       - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --workspace --all-targets -- --deny=warnings
+        run: cargo clippy --workspace --all-targets -- --deny=warnings
 
       - name: Build
         run: ./ci/cargo-build-test.sh
