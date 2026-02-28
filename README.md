@@ -41,7 +41,8 @@ Find binary releases [on GitHub](https://github.com/Blockdaemon/solana-accountsd
 
 #### Prerequisites
 
-You will need version 3.15 or later of the protobuf compiler `protoc` installed, since it is required for the `--experimental_allow_proto3_optional` option.
+- Rust 1.93.1 (see `rust-toolchain.toml`; use `rustup` to install)
+- Protobuf compiler `protoc` version 3.15 or later, since it is required for the `--experimental_allow_proto3_optional` option.
 
 Note that as of this writing, Ubuntu 22.04 still has an obsolete of `protoc`.
 

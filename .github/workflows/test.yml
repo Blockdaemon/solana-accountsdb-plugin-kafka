@@ -43,7 +43,7 @@ jobs:
       - name: Install cargo-cache
         # Use --locked to pin to the exact dependency versions in cargo-cache's Cargo.lock
         # This prevents pulling in newer transitive dependencies (like home@0.5.12)
-        # that require rustc 1.88, ensuring compatibility with our rustc 1.86 toolchain
+        # that require rustc 1.88, ensuring compatibility with our rustc 1.93.1 toolchain
         run: cargo install cargo-cache --locked
 
       - uses: actions/cache@v3
