@@ -34,7 +34,7 @@ jobs:
         # May show a yanked transitive dep warning (crossbeam-channel 0.5.6); install still succeeds.
         run: cargo install cargo-cache --locked
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
