@@ -2,3 +2,4 @@
 # https://github.com/anza-xyz/agave/blob/master/rust-toolchain.toml
 [toolchain]
 channel = "1.93.1"
+components = ["rustfmt", "clippy"]
