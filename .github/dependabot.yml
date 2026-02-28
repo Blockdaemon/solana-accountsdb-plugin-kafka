@@ -1,5 +1,16 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "v3.1"
+
   # Monitor main branch for development dependencies (allows 3.x upgrades)
   - package-ecosystem: "cargo"
     directory: "/"
