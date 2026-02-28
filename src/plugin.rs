@@ -27,6 +27,7 @@ use {
         ReplicaTransactionInfoV3, ReplicaTransactionInfoVersions, Result as PluginResult,
         SlotStatus as PluginSlotStatus,
     },
+    env_logger::Env,
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
     solana_pubkey::{Pubkey, pubkey},
@@ -57,7 +58,7 @@ impl GeyserPlugin for KafkaPlugin {
             return Err(PluginError::Custom("plugin already loaded".into()));
         }
 
-        solana_logger::setup_with_default("info");
+        env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
         info!(
             "Loading plugin {:?} from config_file {:?}",
             self.name(),
