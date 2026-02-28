@@ -30,9 +30,8 @@ jobs:
           sudo apt-get satisfy -f -y "protobuf-compiler (>=3.15)"
 
       - name: Install cargo-cache
-        # Use --locked to pin to the exact dependency versions in cargo-cache's Cargo.lock
-        # This prevents pulling in newer transitive dependencies (like home@0.5.12)
-        # that require rustc 1.88, ensuring compatibility with our rustc 1.86 toolchain
+        # Use --locked to pin deps; without it, home@0.5.12 (requires rustc 1.88) would fail on older toolchains.
+        # May show a yanked transitive dep warning (crossbeam-channel 0.5.6); install still succeeds.
         run: cargo install cargo-cache --locked
 
       - uses: actions/cache@v4
