@@ -319,7 +319,7 @@ impl KafkaPlugin {
     }
 
     fn build_inner_instruction(
-        ix: &solana_transaction_status::InnerInstruction,
+        ix: &solana_transaction_status_client_types::InnerInstruction,
     ) -> InnerInstruction {
         InnerInstruction {
             instruction: Some(Self::build_compiled_instruction(&ix.instruction)),
@@ -336,7 +336,7 @@ impl KafkaPlugin {
     }
 
     fn build_transaction_token_balance(
-        transaction_token_account_balance: solana_transaction_status::TransactionTokenBalance,
+        transaction_token_account_balance: solana_transaction_status_client_types::TransactionTokenBalance,
     ) -> TransactionTokenBalance {
         TransactionTokenBalance {
             account_index: transaction_token_account_balance.account_index as u32,
@@ -612,7 +612,7 @@ impl KafkaPlugin {
 
     /// Extract compute units consumed from transaction metadata
     fn extract_compute_units_from_metadata(
-        transaction_status_meta: &solana_transaction_status::TransactionStatusMeta,
+        transaction_status_meta: &solana_transaction_status_client_types::TransactionStatusMeta,
     ) -> u32 {
         // Check if compute units are available in the metadata
         if let Some(compute_units) = transaction_status_meta.compute_units_consumed {
