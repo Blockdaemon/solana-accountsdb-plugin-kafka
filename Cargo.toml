@@ -15,11 +15,14 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 agave-geyser-plugin-interface = { version = "~3.1" }
-solana-logger = { version = "~3.0" }
 solana-message = { version = "~3.1" }
 solana-pubkey = { version = "~4.1" }
 solana-transaction-status = { version = "~3.1" }
 
+bytes = "*"
+env_logger = "*"
+http = "*"
+http-body-util = "*"
 hyper = { version = "*", features = ["http1", "server"] }
 hyper-util = { version = "*", features = ["tokio", "server"] }
 lazy_static = "*"
@@ -31,9 +34,6 @@ serde = { version = "*", features = ["derive"] }
 serde_json = { version = "*" }
 tokio = { version = "*", features = ["rt-multi-thread", "time", "macros", "sync", "net"] }
 tower = { version = "*", features = ["make"] }
-bytes = "*"
-http-body-util = "*"
-http = "*"
 
 [build-dependencies]
 anyhow = "*"
