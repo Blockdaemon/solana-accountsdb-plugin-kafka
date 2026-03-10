@@ -18,25 +18,15 @@ updates:
       interval: "daily"
     # Main branch can accept all updates including major versions
     groups:
-      agave-updates:
+      # Agave + Solana stack in one PR
+      agave-solana-stack:
         patterns:
           - "agave-*"
-        update-types:
-          - "patch"
-          - "minor"
-      solana-updates:
-        patterns:
           - "solana-*"
-        update-types:
-          - "patch"
-          - "minor"
       other-updates:
         exclude-patterns:
           - "agave-*"
           - "solana-*"
-        update-types:
-          - "patch"
-          - "minor"
 
   # Monitor v3.1 branch for production dependencies (restricts to 3.x)
   - package-ecosystem: "cargo"
@@ -65,24 +55,12 @@ updates:
       #  versions: [">=9.0.7"]
       #- dependency-name: "time"
       #  versions: [">=0.3.45"]
-    # Group related updates together
     groups:
-      agave-updates:
+      agave-solana-stack:
         patterns:
           - "agave-*"
-        update-types:
-          - "patch"
-          - "minor"
-      solana-updates:
-        patterns:
           - "solana-*"
-        update-types:
-          - "patch"
-          - "minor"
       other-updates:
         exclude-patterns:
           - "agave-*"
           - "solana-*"
-        update-types:
-          - "patch"
-          - "minor"
