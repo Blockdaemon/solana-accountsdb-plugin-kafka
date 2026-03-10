@@ -34,18 +34,10 @@ updates:
         versions: [">=0.3.45"]
     # Group related updates together
     groups:
-      agave-updates:
+      agave-solana-stack:
         patterns:
           - "agave-*"
-        update-types:
-          - "patch"
-          - "minor"
-      solana-updates:
-        patterns:
           - "solana-*"
-        update-types:
-          - "patch"
-          - "minor"
       other-updates:
         exclude-patterns:
           - "agave-*"
