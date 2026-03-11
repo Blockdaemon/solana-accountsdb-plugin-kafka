@@ -2127,14 +2127,14 @@ version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc3397241392f5756925029acaa8515dc70fcbe3d8059d4885d7d6533baf64fd"
 dependencies = [
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-program-error",
  "solana-program-memory",
 ]
 
 [[package]]
 name = "solana-accountsdb-plugin-kafka"
-version = "0.2.2+agave.4.0.0-beta.0"
+version = "0.2.2+agave.4.0.0-beta.1"
 dependencies = [
  "agave-geyser-plugin-interface",
  "anyhow",
@@ -2169,14 +2169,14 @@ version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2ecac8e1b7f74c2baa9e774c42817e3e75b20787134b76cc4d45e8a604488f5"
 dependencies = [
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
 ]
 
 [[package]]
 name = "solana-address"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68c5d02824391b072dc5cd0aaa85fb0af9784a21d23286a767994d1e8a322131"
+checksum = "500b83d41bda401b84ebff6033e2e7bc828870ea444805112d15fc0a3e470b9c"
 dependencies = [
  "borsh",
  "bytemuck",
@@ -2431,7 +2431,7 @@ dependencies = [
  "five8",
  "five8_core",
  "rand 0.9.2",
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-seed-phrase",
  "solana-signature",
  "solana-signer",
@@ -2488,7 +2488,7 @@ dependencies = [
  "lazy_static",
  "serde",
  "serde_derive",
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-hash",
  "solana-instruction",
  "solana-sanitize",
@@ -2580,7 +2580,7 @@ version = "4.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b06bd918d60111ee1f97de817113e2040ca0cedb740099ee8d646233f6b906c"
 dependencies = [
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
 ]
 
 [[package]]
@@ -2641,7 +2641,7 @@ version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "def234c1956ff616d46c9dd953f251fa7096ddbaa6d52b165218de97882b7280"
 dependencies = [
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
 ]
 
 [[package]]
@@ -2827,7 +2827,7 @@ dependencies = [
  "num-traits",
  "serde",
  "serde_derive",
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-instruction",
  "solana-msg",
  "solana-program-error",
@@ -2871,7 +2871,7 @@ version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17358d1e9a13e5b9c2264d301102126cf11a47fd394cdf3dec174fe7bc96e1de"
 dependencies = [
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-sdk-ids",
 ]
 
@@ -2883,7 +2883,7 @@ checksum = "96697cff5075a028265324255efed226099f6d761ca67342b230d09f72cc48d2"
 dependencies = [
  "serde",
  "serde_derive",
- "solana-address 2.2.0",
+ "solana-address 2.3.0",
  "solana-hash",
  "solana-instruction",
  "solana-instruction-error",
@@ -3326,9 +3326,9 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.26.0"
+version = "3.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82a72c767771b47409d2345987fda8628641887d5466101319899796367354a0"
+checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
  "getrandom 0.4.2",
