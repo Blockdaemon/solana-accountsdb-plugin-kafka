@@ -79,6 +79,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "agave-logger"
+version = "4.0.0-beta.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8335a1e7e17cb4509ae49214aefd71540de97e8745bbf2b64fb01c140333acf"
+dependencies = [
+ "env_logger",
+ "libc",
+ "log",
+ "signal-hook 0.4.3",
+]
+
+[[package]]
 name = "agave-reserved-account-keys"
 version = "4.0.0-beta.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2026,7 +2038,7 @@ checksum = "47106eded3c154e70176fc83df9737335c94ce22f821c32d17ed1db1f83badb1"
 dependencies = [
  "libc",
  "os_pipe",
- "signal-hook",
+ "signal-hook 0.3.18",
 ]
 
 [[package]]
@@ -2034,6 +2046,16 @@ name = "signal-hook"
 version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d881a16cf4426aa584979d30bd82cb33429027e42122b169753d6ef1085ed6e2"
+dependencies = [
+ "libc",
+ "signal-hook-registry",
+]
+
+[[package]]
+name = "signal-hook"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b57709da74f9ff9f4a27dce9526eec25ca8407c45a7887243b031a58935fb8e"
 dependencies = [
  "libc",
  "signal-hook-registry",
@@ -2171,10 +2193,10 @@ name = "solana-accountsdb-plugin-kafka"
 version = "0.2.2+agave.4.0.0-beta.2"
 dependencies = [
  "agave-geyser-plugin-interface",
+ "agave-logger",
  "anyhow",
  "bytes",
  "cargo-lock",
- "env_logger",
  "git-version",
  "http",
  "http-body-util",
