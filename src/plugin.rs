@@ -14,12 +14,12 @@
 
 use {
     crate::{
-        BlockEvent, CompiledInstruction, Config, Filter, InnerInstruction, InnerInstructions,
-        LegacyLoadedMessage, LegacyMessage, LoadedAddresses, MessageAddressTableLookup,
-        MessageHeader, PrometheusService, Publisher, Reward, RewardsAndNumPartitions,
+        BlockEvent, CompiledInstruction, Config, Filter, HttpService, InnerInstruction,
+        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
+        MessageAddressTableLookup, MessageHeader, Publisher, Reward, RewardsAndNumPartitions,
         SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
         TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
-        V0LoadedMessage, V0Message, sanitized_message,
+        V0LoadedMessage, V0Message, sanitized_message, server::subscriptions::AccountSubscriptions,
     },
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPlugin, GeyserPluginError as PluginError, ReplicaAccountInfoV3,
@@ -38,7 +38,8 @@ pub struct KafkaPlugin {
     publisher: Option<Publisher>,
     filter: Option<Vec<Filter>>,
     block_events_topic: Option<(String, bool)>,
-    prometheus: Option<PrometheusService>,
+    http_service: Option<HttpService>,
+    account_subscriptions: AccountSubscriptions,
 }
 
 impl Debug for KafkaPlugin {
@@ -75,12 +76,12 @@ impl GeyserPlugin for KafkaPlugin {
         info!("Created rdkafka::FutureProducer");
 
         let publisher = Publisher::new(producer, &config);
-        let prometheus = config
-            .create_prometheus()
+        let http_service = config
+            .create_http_service(self.account_subscriptions.clone())
             .map_err(|error| PluginError::Custom(Box::new(error)))?;
         self.publisher = Some(publisher);
         self.filter = Some(config.filters.iter().map(Filter::new).collect());
-        self.prometheus = prometheus;
+        self.http_service = http_service;
         self.block_events_topic = config
             .block_events_topic
             .map(|b| (b.topic, b.wrap_messages));
@@ -92,8 +93,8 @@ impl GeyserPlugin for KafkaPlugin {
     fn on_unload(&mut self) {
         self.publisher = None;
         self.filter = None;
-        if let Some(prometheus) = self.prometheus.take() {
-            prometheus.shutdown();
+        if let Some(http_service) = self.http_service.take() {
+            http_service.shutdown();
         }
     }
 
@@ -110,9 +111,16 @@ impl GeyserPlugin for KafkaPlugin {
 
         let info = Self::unwrap_update_account(account);
         let publisher = self.unwrap_publisher();
+        let subs = &self.account_subscriptions;
         for filter in filters {
             if !filter.update_account_topic.is_empty() {
-                if !filter.wants_program(info.owner) && !filter.wants_account(info.pubkey) {
+                let wants_program = filter.wants_program(info.owner);
+                let wants_account = match <&[u8; 32]>::try_from(info.pubkey) {
+                    Ok(key) => subs.contains_sync(key),
+                    Err(_) => false,
+                };
+
+                if !wants_program && !wants_account {
                     Self::log_ignore_account_update(info);
                     continue;
                 }
@@ -176,6 +184,7 @@ impl GeyserPlugin for KafkaPlugin {
     ) -> PluginResult<()> {
         let info = Self::unwrap_transaction(transaction);
         let publisher = self.unwrap_publisher();
+        let subs = &self.account_subscriptions;
         for filter in self.unwrap_filters() {
             if !filter.transaction_topic.is_empty() {
                 let is_failed = info.transaction_status_meta.status.is_err();
@@ -193,7 +202,7 @@ impl GeyserPlugin for KafkaPlugin {
                     .iter()
                     .any(|pubkey| {
                         filter.wants_program(pubkey.as_ref())
-                            || filter.wants_account(pubkey.as_ref())
+                            || subs.contains_sync(&pubkey.to_bytes())
                     })
                 {
                     debug!("Ignoring transaction {:?}", info.signature);

@@ -16,7 +16,7 @@ use {
     crate::{
         BlockEvent, Config, MessageWrapper, SlotStatusEvent, TransactionEvent, UpdateAccountEvent,
         message_wrapper::EventMessage::{self, Account, Slot, Transaction},
-        prom::{
+        server::prom::{
             StatsThreadedProducerContext, UPLOAD_ACCOUNTS_TOTAL, UPLOAD_SLOTS_TOTAL,
             UPLOAD_TRANSACTIONS_TOTAL,
         },

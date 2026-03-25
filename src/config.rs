@@ -13,7 +13,9 @@
 // limitations under the License.
 
 use {
-    crate::{PrometheusService, prom::StatsThreadedProducerContext},
+    crate::server::{
+        HttpService, prom::StatsThreadedProducerContext, subscriptions::AccountSubscriptions,
+    },
     agave_geyser_plugin_interface::geyser_plugin_interface::{
         GeyserPluginError, Result as PluginResult,
     },
@@ -98,8 +100,10 @@ impl Config {
         self.set_default("partitioner", "murmur2_random");
     }
 
-    pub fn create_prometheus(&self) -> IoResult<Option<PrometheusService>> {
-        self.prometheus.map(PrometheusService::new).transpose()
+    pub fn create_http_service(&self, subs: AccountSubscriptions) -> IoResult<Option<HttpService>> {
+        self.prometheus
+            .map(|addr| HttpService::new(addr, subs))
+            .transpose()
     }
 }
 
@@ -117,8 +121,6 @@ pub struct ConfigFilter {
     pub program_ignores: Vec<String>,
     /// List of programs to include
     pub program_filters: Vec<String>,
-    // List of accounts to include
-    pub account_filters: Vec<String>,
     /// Publish all accounts on startup.
     pub publish_all_accounts: bool,
     /// Publish vote transactions.
@@ -137,7 +139,6 @@ impl Default for ConfigFilter {
             transaction_topic: "".to_owned(),
             program_ignores: Vec::new(),
             program_filters: Vec::new(),
-            account_filters: Vec::new(),
             publish_all_accounts: false,
             include_vote_transactions: true,
             include_failed_transactions: true,

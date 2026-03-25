@@ -18,8 +18,8 @@ mod config;
 mod event;
 mod filter;
 mod plugin;
-mod prom;
 mod publisher;
+mod server;
 mod version;
 
 pub use {
@@ -27,8 +27,10 @@ pub use {
     event::*,
     filter::Filter,
     plugin::KafkaPlugin,
-    prom::PrometheusService,
     publisher::Publisher,
+    server::{
+        HttpService, prom::StatsThreadedProducerContext, subscriptions::AccountSubscriptions,
+    },
 };
 
 #[unsafe(no_mangle)]

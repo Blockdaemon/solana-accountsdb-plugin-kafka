@@ -22,6 +22,7 @@ solana-transaction-status = { version = "4.0.0-beta" }
 solana-transaction-status-client-types = { version = "4.0.0-beta" }
 
 bytes = "*"
+dashmap = "*"
 http = "*"
 http-body-util = "*"
 hyper = { version = "*", features = ["http1", "server"] }

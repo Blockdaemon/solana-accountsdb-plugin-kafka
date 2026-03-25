@@ -1,10 +1,8 @@
 use {
     crate::version::VERSION as VERSION_INFO,
     bytes::Bytes,
-    http::StatusCode,
     http_body_util::Full,
-    hyper::{Request, Response, body::Incoming, service::service_fn},
-    hyper_util::rt::TokioIo,
+    hyper::Response,
     log::*,
     prometheus::{GaugeVec, IntCounterVec, Opts, Registry, TextEncoder},
     rdkafka::{
@@ -12,9 +10,7 @@ use {
         producer::{DeliveryResult, ProducerContext},
         statistics::Statistics,
     },
-    std::{io::Result as IoResult, net::SocketAddr, sync::Once, time::Duration},
-    tokio::net::TcpListener,
-    tokio::runtime::Runtime,
+    std::sync::Once,
 };
 
 lazy_static::lazy_static! {
@@ -46,83 +42,37 @@ lazy_static::lazy_static! {
     ).unwrap();
 }
 
-#[derive(Debug)]
-pub struct PrometheusService {
-    runtime: Runtime,
+pub fn register_metrics() {
+    static REGISTER: Once = Once::new();
+    REGISTER.call_once(|| {
+        macro_rules! register {
+            ($collector:ident) => {
+                REGISTRY
+                    .register(Box::new($collector.clone()))
+                    .expect("collector can't be registered");
+            };
+        }
+        register!(VERSION);
+        register!(UPLOAD_ACCOUNTS_TOTAL);
+        register!(UPLOAD_SLOTS_TOTAL);
+        register!(UPLOAD_TRANSACTIONS_TOTAL);
+        register!(KAFKA_STATS);
+
+        for (key, value) in &[
+            ("version", VERSION_INFO.version),
+            ("solana", VERSION_INFO.solana),
+            ("git", VERSION_INFO.git),
+            ("rustc", VERSION_INFO.rustc),
+            ("buildts", VERSION_INFO.buildts),
+        ] {
+            VERSION
+                .with_label_values(&[key.to_string(), value.to_string()])
+                .inc();
+        }
+    });
 }
 
-impl PrometheusService {
-    pub fn new(address: SocketAddr) -> IoResult<Self> {
-        static REGISTER: Once = Once::new();
-        REGISTER.call_once(|| {
-            macro_rules! register {
-                ($collector:ident) => {
-                    REGISTRY
-                        .register(Box::new($collector.clone()))
-                        .expect("collector can't be registered");
-                };
-            }
-            register!(VERSION);
-            register!(UPLOAD_ACCOUNTS_TOTAL);
-            register!(UPLOAD_SLOTS_TOTAL);
-            register!(UPLOAD_TRANSACTIONS_TOTAL);
-            register!(KAFKA_STATS);
-
-            for (key, value) in &[
-                ("version", VERSION_INFO.version),
-                ("solana", VERSION_INFO.solana),
-                ("git", VERSION_INFO.git),
-                ("rustc", VERSION_INFO.rustc),
-                ("buildts", VERSION_INFO.buildts),
-            ] {
-                VERSION
-                    .with_label_values(&[key.to_string(), value.to_string()])
-                    .inc();
-            }
-        });
-
-        let runtime = Runtime::new()?;
-        runtime.spawn(async move {
-            let listener = TcpListener::bind(address).await.unwrap();
-
-            loop {
-                let (stream, _) = match listener.accept().await {
-                    Ok(conn) => conn,
-                    Err(e) => {
-                        error!("Failed to accept connection: {}", e);
-                        continue;
-                    }
-                };
-
-                let io = TokioIo::new(stream);
-
-                let service = service_fn(|req: Request<Incoming>| async move {
-                    let response = match req.uri().path() {
-                        "/metrics" => metrics_handler(),
-                        _ => not_found_handler(),
-                    };
-                    Ok::<_, hyper::Error>(response)
-                });
-
-                tokio::task::spawn(async move {
-                    if let Err(err) = hyper::server::conn::http1::Builder::new()
-                        .serve_connection(io, service)
-                        .await
-                    {
-                        error!("Error serving connection: {}", err);
-                    }
-                });
-            }
-        });
-        Ok(PrometheusService { runtime })
-    }
-
-    pub fn shutdown(self) {
-        self.runtime.shutdown_timeout(Duration::from_secs(10));
-    }
-}
-
-fn metrics_handler() -> Response<Full<Bytes>> {
+pub fn metrics_handler() -> Response<Full<Bytes>> {
     let metrics = TextEncoder::new()
         .encode_to_string(&REGISTRY.gather())
         .unwrap_or_else(|error| {
@@ -131,13 +81,6 @@ fn metrics_handler() -> Response<Full<Bytes>> {
         });
     Response::builder()
         .body(Full::new(Bytes::from(metrics)))
-        .unwrap()
-}
-
-fn not_found_handler() -> Response<Full<Bytes>> {
-    Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body(Full::new(Bytes::from("")))
         .unwrap()
 }
 
