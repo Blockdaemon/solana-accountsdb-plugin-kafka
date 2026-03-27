@@ -2389,9 +2389,9 @@ dependencies = [
 
 [[package]]
 name = "solana-nullable"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a90429a75d69fdcb31952c3dea79f5f3c8157cfe88221e066103c9c237876073"
+checksum = "da028344c595c7416769ff648d206de7962571291a4cea24c38a60b6f40d53bb"
 dependencies = [
  "bytemuck",
 ]
