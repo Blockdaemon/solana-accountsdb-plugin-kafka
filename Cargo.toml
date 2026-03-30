@@ -14,8 +14,8 @@ categories = ["cryptography::cryptocurrencies", "database", "network-programming
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-agave-geyser-plugin-interface = { version = "4.0.0-beta.4" }
-agave-logger = { version = "4.0.0-beta.4", features = ["agave-unstable-api"] }
+agave-geyser-plugin-interface = { version = "4.0.0-beta.5" }
+agave-logger = { version = "4.0.0-beta.5", features = ["agave-unstable-api"] }
 solana-message = { version = "~3.1" }
 solana-pubkey = { version = "~4.1" }
 solana-transaction-status = { version = "4.0.0-beta" }
