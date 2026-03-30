@@ -50,9 +50,9 @@ dependencies = [
 
 [[package]]
 name = "agave-feature-set"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "608865a64ed3ce4b4822c8e5facef41b80392fe664ba13293e8d54ca76a074f6"
+checksum = "5bdd78ab781f61f67e4a721d600efd70b45cf9a41f30c84b73fd0356e5d6bcc0"
 dependencies = [
  "ahash",
  "solana-epoch-schedule",
@@ -65,9 +65,9 @@ dependencies = [
 
 [[package]]
 name = "agave-geyser-plugin-interface"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dea6af8d4fc8663772b03d77658e31c9c887adbecf1d818a1f332dcfce2a7e5"
+checksum = "655b3ab7e17881cf0bcfb2b7a30331dd7524b34db5fb211df3deb210b090e5e3"
 dependencies = [
  "log",
  "solana-clock",
@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "agave-logger"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61fe6a8dc3d70d8353d0a9c471d39c7bdca93725211906deb7a7f80f2b6a5a8b"
+checksum = "c677e2b6a9b56a0280586f0bb5858525f120b09828b8ccb45e99c01e05ce6cd6"
 dependencies = [
  "env_logger",
  "libc",
@@ -92,9 +92,9 @@ dependencies = [
 
 [[package]]
 name = "agave-reserved-account-keys"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e94f7811efb21ec459af4506482c6d1e8f0eb444a480cd18ee341ce54c1774b"
+checksum = "0e7d38e5b965f6ca3d8093732bbf15fb322fd8cc043b20a80430491d15599f27"
 dependencies = [
  "agave-feature-set",
  "solana-pubkey 4.1.0",
@@ -2122,9 +2122,9 @@ dependencies = [
 
 [[package]]
 name = "solana-account-decoder"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d5c031368143d0a398421064a605aa3b56f4f9f5b8680d46219602bbb1ba33"
+checksum = "d4a6c4805c0c8293f8efd16133d3330d8a6d8905f7b4e1b4806de10ceb677750"
 dependencies = [
  "Inflector",
  "base64",
@@ -2164,9 +2164,9 @@ dependencies = [
 
 [[package]]
 name = "solana-account-decoder-client-types"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0093cd074e0d32d2ca2100a48480e7e90bd23323d79790da0d2cab8bdbeb59d2"
+checksum = "472325c711988e04590d6c6e06d1488d035e395f59571c3027102fd1b2911f04"
 dependencies = [
  "base64",
  "bs58",
@@ -2855,9 +2855,9 @@ dependencies = [
 
 [[package]]
 name = "solana-svm-feature-set"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8833dd3a3351278a50bb8f1de70636d126ab08ee708ac0c9977c4da25a9ed6"
+checksum = "ef2d3ac28613b20a4af0182a2e091bd2860e0019dbceba4bd6968cb32c4d24ed"
 
 [[package]]
 name = "solana-system-interface"
@@ -2953,9 +2953,9 @@ dependencies = [
 
 [[package]]
 name = "solana-transaction-context"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c0bdeb5c8aba3fc2c3db7322b951db9810f772ecb28d03c48d70ea59d9278d5"
+checksum = "ca27da7609c2afcf0cde9eb75f5b120d200e760653db943348a79031137fd21b"
 dependencies = [
  "bincode",
  "serde",
@@ -2982,9 +2982,9 @@ dependencies = [
 
 [[package]]
 name = "solana-transaction-status"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c81f16580c918e55abf199aba4b7329f4d7221c7cee00d24a6b4b12ca8d13c62"
+checksum = "ed5ec08a248d39c351c34d74e615e89196c67d1bd19e30793d911e08604b8e3c"
 dependencies = [
  "Inflector",
  "agave-reserved-account-keys",
@@ -3025,9 +3025,9 @@ dependencies = [
 
 [[package]]
 name = "solana-transaction-status-client-types"
-version = "4.0.0-beta.4"
+version = "4.0.0-beta.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4f4346057212353c2b2383791a10f575930b430ab08d8740fcca1c0ebd7f68f"
+checksum = "2df3154021178d2a05a908003815e55761d93b7669a012f1584e051b80b070b9"
 dependencies = [
  "base64",
  "bincode",
