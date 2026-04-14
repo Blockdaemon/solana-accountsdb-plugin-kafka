@@ -21,11 +21,13 @@ use {
             UPLOAD_TRANSACTIONS_TOTAL,
         },
     },
+    log::info,
     prost::Message,
     rdkafka::{
         error::KafkaError,
         producer::{BaseRecord, Producer, ThreadedProducer},
     },
+    solana_pubkey::Pubkey,
     std::time::Duration,
 };
 
@@ -49,17 +51,27 @@ impl Publisher {
         topic: &str,
     ) -> Result<(), KafkaError> {
         let temp_key;
+        let log_pubkey = Pubkey::try_from(ev.pubkey.as_slice()).ok();
         let (key, buf) = if wrap_messages {
-            (
-                &ev.pubkey.clone(),
-                Self::encode_with_wrapper(Account(Box::new(ev))),
-            )
+            temp_key = ev.pubkey.clone();
+            (&temp_key, Self::encode_with_wrapper(Account(Box::new(ev))))
         } else {
             temp_key = self.copy_and_prepend(ev.pubkey.as_slice(), b'A');
             (&temp_key, ev.encode_to_vec())
         };
+        info!("key: {:?}", key);
         let record = BaseRecord::<Vec<u8>, _>::to(topic).key(key).payload(&buf);
         let result = self.producer.send(record).map(|_| ()).map_err(|(e, _)| e);
+        match log_pubkey {
+            Some(pubkey) => info!(
+                "Published account update for pubkey: {} with key {:?}",
+                pubkey, key
+            ),
+            None => info!(
+                "Published account update with invalid pubkey bytes and key {:?}",
+                key
+            ),
+        }
         UPLOAD_ACCOUNTS_TOTAL
             .with_label_values(&[if result.is_ok() { "success" } else { "failed" }])
             .inc();

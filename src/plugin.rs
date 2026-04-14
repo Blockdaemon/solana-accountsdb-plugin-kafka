@@ -14,8 +14,8 @@
 
 use {
     crate::{
-        BlockEvent, CompiledInstruction, Config, Filter, HttpService, InnerInstruction,
-        InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
+        BlockEvent, CompiledInstruction, Config, ConfirmedAccounts, Filter, HttpService,
+        InnerInstruction, InnerInstructions, LegacyLoadedMessage, LegacyMessage, LoadedAddresses,
         MessageAddressTableLookup, MessageHeader, Publisher, Reward, RewardsAndNumPartitions,
         SanitizedMessage, SanitizedTransaction, SlotStatus, SlotStatusEvent, TransactionEvent,
         TransactionStatusMeta, TransactionTokenBalance, UiTokenAmount, UpdateAccountEvent,
@@ -30,7 +30,10 @@ use {
     log::{debug, error, info, log_enabled},
     rdkafka::util::get_rdkafka_version,
     solana_pubkey::{Pubkey, pubkey},
-    std::fmt::{Debug, Formatter},
+    std::{
+        fmt::{Debug, Formatter},
+        sync::{Mutex, MutexGuard},
+    },
 };
 
 #[derive(Default)]
@@ -40,6 +43,7 @@ pub struct KafkaPlugin {
     block_events_topic: Option<(String, bool)>,
     http_service: Option<HttpService>,
     account_subscriptions: AccountSubscriptions,
+    confirmed_accounts: Mutex<ConfirmedAccounts>,
 }
 
 impl Debug for KafkaPlugin {
@@ -85,6 +89,7 @@ impl GeyserPlugin for KafkaPlugin {
         self.block_events_topic = config
             .block_events_topic
             .map(|b| (b.topic, b.wrap_messages));
+        *self.lock_confirmed_accounts()? = ConfirmedAccounts::new();
         info!("Spawned producer");
 
         Ok(())
@@ -110,41 +115,8 @@ impl GeyserPlugin for KafkaPlugin {
         }
 
         let info = Self::unwrap_update_account(account);
-        let publisher = self.unwrap_publisher();
-        let subs = &self.account_subscriptions;
-        for filter in filters {
-            if !filter.update_account_topic.is_empty() {
-                let wants_program = filter.wants_program(info.owner);
-                let wants_account = match <&[u8; 32]>::try_from(info.pubkey) {
-                    Ok(key) => subs.contains_sync(key),
-                    Err(_) => false,
-                };
-
-                if !wants_program && !wants_account {
-                    Self::log_ignore_account_update(info);
-                    continue;
-                }
-
-                let event = UpdateAccountEvent {
-                    slot,
-                    pubkey: info.pubkey.to_vec(),
-                    lamports: info.lamports,
-                    owner: info.owner.to_vec(),
-                    executable: info.executable,
-                    rent_epoch: info.rent_epoch,
-                    data: info.data.to_vec(),
-                    write_version: info.write_version,
-                    txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
-                    data_version: info.write_version as u32, // Use write_version as data version
-                    is_startup,                              // Use the is_startup parameter
-                    account_age: slot.saturating_sub(info.rent_epoch), // Approximate age from rent epoch
-                };
-
-                publisher
-                    .update_account(event, filter.wrap_messages, &filter.update_account_topic)
-                    .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })?;
-            }
-        }
+        let event = Self::build_update_account_event(info, slot, is_startup);
+        self.lock_confirmed_accounts()?.record_account(event);
 
         Ok(())
     }
@@ -157,6 +129,19 @@ impl GeyserPlugin for KafkaPlugin {
     ) -> PluginResult<()> {
         let publisher = self.unwrap_publisher();
         let value = SlotStatus::from(status.clone());
+        let transition = self
+            .lock_confirmed_accounts()?
+            .record_slot_status(slot, parent, value);
+        if !transition.newly_confirmed_slots.is_empty() {
+            info!(
+                "slot {} newly confirmed slots {:?}, drained {} account updates",
+                slot,
+                transition.newly_confirmed_slots,
+                transition.confirmed_updates.len()
+            );
+        }
+
+        let mut first_error = None;
         for filter in self.unwrap_filters() {
             if !filter.slot_status_topic.is_empty() {
                 let event = SlotStatusEvent {
@@ -168,13 +153,32 @@ impl GeyserPlugin for KafkaPlugin {
                     status_description: Self::get_slot_status_description(&value), // Get human-readable status
                 };
 
-                publisher
-                    .update_slot_status(event, filter.wrap_messages, &filter.slot_status_topic)
-                    .map_err(|e| PluginError::AccountsUpdateError { msg: e.to_string() })?;
+                if let Err(error) = publisher.update_slot_status(
+                    event,
+                    filter.wrap_messages,
+                    &filter.slot_status_topic,
+                ) {
+                    let plugin_error = PluginError::AccountsUpdateError {
+                        msg: error.to_string(),
+                    };
+                    error!(
+                        "failed to publish slot status for slot {}: {plugin_error:?}",
+                        slot
+                    );
+                    if first_error.is_none() {
+                        first_error = Some(plugin_error);
+                    }
+                }
             }
         }
 
-        Ok(())
+        if let Err(error) = self.publish_confirmed_account_updates(transition.confirmed_updates)
+            && first_error.is_none()
+        {
+            first_error = Some(error);
+        }
+
+        first_error.map_or(Ok(()), Err)
     }
 
     fn notify_transaction(
@@ -255,6 +259,14 @@ impl KafkaPlugin {
         Default::default()
     }
 
+    fn lock_confirmed_accounts(&self) -> PluginResult<MutexGuard<'_, ConfirmedAccounts>> {
+        self.confirmed_accounts.lock().map_err(|error| {
+            PluginError::Custom(Box::new(std::io::Error::other(format!(
+                "confirmed_accounts mutex poisoned: {error}"
+            ))))
+        })
+    }
+
     fn unwrap_publisher(&self) -> &Publisher {
         self.publisher.as_ref().expect("publisher is unavailable")
     }
@@ -315,6 +327,91 @@ impl KafkaPlugin {
             }
             ReplicaBlockInfoVersions::V0_0_4(info) => info,
         }
+    }
+
+    fn build_update_account_event(
+        info: &ReplicaAccountInfoV3<'_>,
+        slot: u64,
+        is_startup: bool,
+    ) -> UpdateAccountEvent {
+        UpdateAccountEvent {
+            slot,
+            pubkey: info.pubkey.to_vec(),
+            lamports: info.lamports,
+            owner: info.owner.to_vec(),
+            executable: info.executable,
+            rent_epoch: info.rent_epoch,
+            data: info.data.to_vec(),
+            write_version: info.write_version,
+            txn_signature: info.txn.map(|v| v.signature().as_ref().to_owned()),
+            data_version: info.write_version as u32,
+            is_startup,
+            account_age: slot.saturating_sub(info.rent_epoch),
+        }
+    }
+
+    fn should_publish_account(&self, event: &UpdateAccountEvent) -> bool {
+        // Program-based account publication is being deprecated and is intentionally
+        // unsupported here. Confirmed account publication only follows dynamic
+        // account subscriptions.
+        match <&[u8; 32]>::try_from(event.pubkey.as_slice()) {
+            Ok(key) => self.account_subscriptions.contains_sync(key),
+            Err(_) => false,
+        }
+    }
+
+    fn publish_confirmed_account_updates(
+        &self,
+        updates: Vec<UpdateAccountEvent>,
+    ) -> PluginResult<()> {
+        if updates.is_empty() {
+            return Ok(());
+        }
+
+        let publisher = self.unwrap_publisher();
+        let filters = self.unwrap_filters();
+        let mut first_error = None;
+
+        for event in updates {
+            let mut matched_any_filter = false;
+            for filter in filters {
+                if filter.update_account_topic.is_empty() || !self.should_publish_account(&event) {
+                    continue;
+                }
+
+                matched_any_filter = true;
+                if let Ok(key) = <[u8; 32]>::try_from(event.pubkey.as_slice()) {
+                    info!(
+                        "Matched confirmed account update {} in slot {}",
+                        Pubkey::new_from_array(key),
+                        event.slot
+                    );
+                }
+
+                if let Err(error) = publisher.update_account(
+                    event.clone(),
+                    filter.wrap_messages,
+                    &filter.update_account_topic,
+                ) {
+                    let plugin_error = PluginError::AccountsUpdateError {
+                        msg: error.to_string(),
+                    };
+                    error!(
+                        "failed to publish confirmed account update for slot {}: {plugin_error:?}",
+                        event.slot
+                    );
+                    if first_error.is_none() {
+                        first_error = Some(plugin_error);
+                    }
+                }
+            }
+
+            if !matched_any_filter {
+                Self::log_ignore_account_update(&event.pubkey);
+            }
+        }
+
+        first_error.map_or(Ok(()), Err)
     }
 
     fn build_compiled_instruction(
@@ -606,15 +703,14 @@ impl KafkaPlugin {
         }
     }
 
-    fn log_ignore_account_update(info: &ReplicaAccountInfoV3) {
+    fn log_ignore_account_update(pubkey: &[u8]) {
         if log_enabled!(::log::Level::Debug) {
-            match <&[u8; 32]>::try_from(info.owner) {
+            match <&[u8; 32]>::try_from(pubkey) {
                 Ok(key) => debug!(
                     "Ignoring update for account key: {:?}",
                     Pubkey::new_from_array(*key)
                 ),
-                // Err should never happen because wants_account_key only returns false if the input is &[u8; 32]
-                Err(_err) => debug!("Ignoring update for account key: {:?}", info.owner),
+                Err(_err) => debug!("Ignoring update for account key bytes: {:?}", pubkey),
             };
         }
     }

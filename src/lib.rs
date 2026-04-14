@@ -15,6 +15,7 @@
 use agave_geyser_plugin_interface::geyser_plugin_interface::GeyserPlugin;
 
 mod config;
+mod confirmed_accounts;
 mod event;
 mod filter;
 mod plugin;
@@ -24,6 +25,7 @@ mod version;
 
 pub use {
     config::{Config, ConfigFilter, Producer},
+    confirmed_accounts::{ConfirmedAccounts, SlotTransitionResult},
     event::*,
     filter::Filter,
     plugin::KafkaPlugin,
