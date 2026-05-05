@@ -2205,7 +2205,7 @@ dependencies = [
  "rdkafka",
  "serde",
  "serde_json",
- "solana-message",
+ "solana-message 4.1.1",
  "solana-pubkey 4.2.0",
  "solana-transaction-status",
  "solana-transaction-status-client-types",
@@ -2545,6 +2545,21 @@ dependencies = [
  "solana-sanitize",
  "solana-sdk-ids",
  "solana-short-vec",
+ "solana-transaction-error",
+]
+
+[[package]]
+name = "solana-message"
+version = "4.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a634d1db65a393d4e87ec49ef97c8dfb12201e2ba9e5faf87ff34e632f29e509"
+dependencies = [
+ "lazy_static",
+ "solana-address 2.6.0",
+ "solana-hash",
+ "solana-instruction",
+ "solana-sanitize",
+ "solana-sdk-ids",
  "solana-transaction-error",
 ]
 
@@ -2947,7 +2962,7 @@ dependencies = [
  "solana-hash",
  "solana-instruction",
  "solana-instruction-error",
- "solana-message",
+ "solana-message 3.1.0",
  "solana-sanitize",
  "solana-sdk-ids",
  "solana-short-vec",
@@ -3006,7 +3021,7 @@ dependencies = [
  "solana-instruction",
  "solana-loader-v2-interface",
  "solana-loader-v3-interface",
- "solana-message",
+ "solana-message 3.1.0",
  "solana-program-option",
  "solana-pubkey 4.2.0",
  "solana-reward-info",
@@ -3041,7 +3056,7 @@ dependencies = [
  "solana-account-decoder-client-types",
  "solana-commitment-config",
  "solana-instruction",
- "solana-message",
+ "solana-message 3.1.0",
  "solana-pubkey 4.2.0",
  "solana-reward-info",
  "solana-signature",
@@ -3509,9 +3524,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.52.1"
+version = "1.52.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b67dee974fe86fd92cc45b7a95fdd2f99a36a6d7b0d431a231178d3d670bbcc6"
+checksum = "110a78583f19d5cdb2c5ccf321d1290344e71313c6c37d43520d386027d18386"
 dependencies = [
  "libc",
  "mio",
