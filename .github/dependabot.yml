@@ -5,56 +5,10 @@ updates:
     schedule:
       interval: "daily"
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "v3.1"
-
-  # Monitor main branch for development dependencies (allows 3.x upgrades)
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "daily"
-    # Main branch can accept all updates including major versions
-    groups:
-      # Agave + Solana stack in one PR
-      agave-solana-stack:
-        patterns:
-          - "agave-*"
-          - "solana-transaction-*"
-      other-updates:
-        exclude-patterns:
-          - "agave-*"
-          - "solana-transaction-*"
-
-  # Monitor v3.1 branch for production dependencies (restricts to 3.x)
-  - package-ecosystem: "cargo"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "v3.1"
-    # Allow updates within 3.x range, prevent 4.x upgrades
-    allow:
-      # Allow updates within major version 3.x for Agave ecosystem
-      - dependency-name: "agave-geyser-plugin-interface"
-      # Allow updates within major version 3.x for Solana ecosystem
-      - dependency-name: "solana-*"
-      # Allow all other dependency updates
-      - dependency-name: "*"
-    # Prevent major version upgrades that could break compatibility
-    ignore:
-      # Block Agave 4.x upgrades (would break ABI compatibility)
-      - dependency-name: "agave-geyser-plugin-interface"
-        versions: [">=4.0.0"]
-      # Block Solana 4.x upgrades (would break compatibility)
-      - dependency-name: "solana-*"
-        versions: [">=4.0.0"]
-      # Pinned for Rust 1.86 on v3.1; vergen 9.1.0+ and time 0.3.45+ require rustc 1.88
-      #- dependency-name: "vergen"
-      #  versions: [">=9.0.7"]
-      #- dependency-name: "time"
-      #  versions: [">=0.3.45"]
     groups:
       agave-solana-stack:
         patterns:
