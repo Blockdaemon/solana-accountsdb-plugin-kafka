@@ -15,6 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 agave-geyser-plugin-interface = { version = "~3.1" }
+solana-hash = { version = "~4.2" } # 4.3+ require rust 1.89
 solana-message = { version = "~3.1" }
 solana-pubkey = { version = "~4.1" }
 solana-transaction-status = { version = "~3.1" }
