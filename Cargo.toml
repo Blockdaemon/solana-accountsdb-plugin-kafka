@@ -43,7 +43,7 @@ anyhow = "*"
 cargo-lock = "*"
 git-version = "*"
 prost-build = "*"
-vergen = { version = "9", features = ["build", "rustc"] } # newer versions of vergen require rust 1.96
+vergen = { version = "9", features = ["build", "rustc"] } # newer versions of vergen require rust 1.106
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
