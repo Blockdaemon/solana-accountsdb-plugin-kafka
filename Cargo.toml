@@ -2,7 +2,7 @@
 name = "solana-accountsdb-plugin-kafka"
 description = "Solana AccountsDb plugin for Kafka"
 authors = ["Blockdaemon"]
-version = "0.2.2+agave.4.0.2"
+version = "0.2.3+agave.4.1.0-beta.3"
 edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/Blockdaemon/solana-accountsdb-plugin-kafka"
@@ -14,12 +14,14 @@ categories = ["cryptography::cryptocurrencies", "database", "network-programming
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-agave-geyser-plugin-interface = { version = "~4" }
+agave-geyser-plugin-interface = { version = "4.1.0-beta.3" }
 agave-logger = { version = "*", features = ["agave-unstable-api"] }
-solana-message = { version = "~3.1" }
+solana-message = { version = "*" }
 solana-pubkey = { version = "*" }
-solana-transaction-status = { version = "*" }
-solana-transaction-status-client-types = { version = "*" }
+# Pinned to match agave-geyser-plugin-interface; a bare "*" excludes pre-releases
+# and resolves to 3.1.x, which duplicates solana-message (3.1.0 vs 4.2.1).
+solana-transaction-status = { version = "=4.1.0-beta.3" }
+solana-transaction-status-client-types = { version = "=4.1.0-beta.3" }
 
 bytes = "*"
 http = "*"

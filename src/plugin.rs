@@ -567,6 +567,44 @@ impl KafkaPlugin {
                                 },
                             })
                         }
+                        solana_message::VersionedMessage::V1(v1) => {
+                            // V1 messages have no address lookup tables, so they map
+                            // cleanly onto the legacy payload shape. The lifetime
+                            // specifier serves the role of the recent blockhash.
+                            sanitized_message::MessagePayload::Legacy(LegacyLoadedMessage {
+                                message: Some(LegacyMessage {
+                                    header: Some(Self::build_message_header(&v1.header)),
+                                    account_keys: v1
+                                        .account_keys
+                                        .iter()
+                                        .map(|k| k.as_ref().into())
+                                        .collect(),
+                                    recent_block_hash: v1.lifetime_specifier.as_ref().into(),
+                                    instructions: v1
+                                        .instructions
+                                        .iter()
+                                        .map(Self::build_compiled_instruction)
+                                        .collect(),
+                                }),
+                                is_writable_account_cache: {
+                                    let num_required = v1.header.num_required_signatures as usize;
+                                    let num_readonly_signed =
+                                        v1.header.num_readonly_signed_accounts as usize;
+
+                                    (0..v1.account_keys.len())
+                                        .map(|i| {
+                                            if i < num_required {
+                                                true // Required signers are always writable
+                                            } else if i < num_required + num_readonly_signed {
+                                                false // Readonly signed accounts
+                                            } else {
+                                                true // Remaining accounts are writable
+                                            }
+                                        })
+                                        .collect()
+                                },
+                            })
+                        }
                     }),
                 }),
                 signatures: transaction
@@ -660,6 +698,7 @@ impl KafkaPlugin {
         match message {
             solana_message::VersionedMessage::Legacy(lv) => Some(&lv.account_keys),
             solana_message::VersionedMessage::V0(v0) => Some(&v0.account_keys),
+            solana_message::VersionedMessage::V1(v1) => Some(&v1.account_keys),
         }
     }
 
