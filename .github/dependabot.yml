@@ -18,3 +18,24 @@ updates:
         exclude-patterns:
           - "agave-*"
           - "solana-transaction-*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "v4.0"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "cargo"
+    directory: "/"
+    target-branch: "v4.0"
+    schedule:
+      interval: "daily"
+    groups:
+      agave-solana-stack:
+        patterns:
+          - "agave-*"
+          - "solana-transaction-*"
+      other-updates:
+        exclude-patterns:
+          - "agave-*"
+          - "solana-transaction-*"
