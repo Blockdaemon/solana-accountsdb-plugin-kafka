@@ -1,5 +1,5 @@
 use cargo_lock::Lockfile;
-use vergen::{BuildBuilder, Emitter, RustcBuilder};
+use vergen::{Build, Emitter, Rustc};
 
 fn main() -> anyhow::Result<()> {
     // Proto
@@ -14,8 +14,8 @@ fn main() -> anyhow::Result<()> {
 
     // Version metrics
     let _ = Emitter::default()
-        .add_instructions(&BuildBuilder::all_build()?)?
-        .add_instructions(&RustcBuilder::all_rustc()?)?
+        .add_instructions(&Build::all_build())?
+        .add_instructions(&Rustc::all_rustc())?
         .emit();
 
     // vergen git version does not looks cool
