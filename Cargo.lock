@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "agave-logger"
-version = "4.0.2"
+version = "4.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1a6f2bd1186a9e78b749e8fd9d4b7076b2961e3c06972a48bc5973746b1ae85"
+checksum = "dc6ae9893c97eedefb1f3b2108a04047465528cdf389da158f7953f8d002f4d6"
 dependencies = [
  "env_logger",
  "libc",
